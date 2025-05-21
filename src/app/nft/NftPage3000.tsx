@@ -54,7 +54,7 @@ export default function NftPage3000() {
         <div className="bg-green-100 origin-top-left rounded-2xl shadow-md p-6">
           <div className="flex items-center space-x-6">
             <img
-              src="/snowbot3000.PNG"
+              src="/snowbot3000.png"
               alt="SNOW BOT 3000"
               className="w-24 h-24 rounded-xl border"
             />

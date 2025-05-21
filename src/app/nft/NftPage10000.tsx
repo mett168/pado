@@ -53,7 +53,7 @@ export default function NftPage10000() {
         {/* 카드 박스 */}
         <div className="bg-green-100 origin-top-left rounded-2xl shadow-md p-6">
           <div className="flex items-center space-x-6">
-            <img src="/snowbot10000.PNG" alt="SNOW BOT 10000" className="w-24 h-24 rounded-xl border" />
+            <img src="/snowbot10000.png" alt="SNOW BOT 10000" className="w-24 h-24 rounded-xl border" />
             <div className="flex-1">
               <div className="flex justify-between items-center">
                 <span className="text-gray-800 text-sm font-semibold">이름</span>

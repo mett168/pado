@@ -259,7 +259,7 @@ export default function HomePage() {
           <div className="px-4 p-2 space-y-1">
             {[{
               name: "SNOWBOT 300",
-              image: "/SNOW100.PNG",
+              image: "/SNOW100.png",
               type: "nft300",
             }, {
               name: "SNOWBOT 3000",
