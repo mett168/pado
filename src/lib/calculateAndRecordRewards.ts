@@ -12,7 +12,7 @@ function getTodayDate() {
 
 export async function calculateAndRecordRewards() {
   try {
-    console.log("\uD83D\uDDFC\uFE0F 리워드 계산 시작");
+    console.log("🧮 리워드 계산 시작");
     const today = getTodayDate();
 
     const { data: users, error: userError } = await supabase
@@ -20,15 +20,12 @@ export async function calculateAndRecordRewards() {
       .select("ref_code, name, wallet_address, ref_by, center_id, role");
 
     if (userError || !users) throw new Error("유저 조회 실패");
-    console.log("총 유저 수:", users.length);
 
     let count = 0;
 
     for (const user of users) {
       const { ref_code, name, ref_by, center_id, wallet_address, role } = user;
       const lowerAddress = wallet_address?.toLowerCase();
-
-      console.log("➡️ 유저 처리 시작:", ref_code);
 
       const { data: nftRow, error: nftError } = await supabase
         .from("nfts")
@@ -50,10 +47,7 @@ export async function calculateAndRecordRewards() {
         nft3000 * DAILY_REWARD_BY_NFT.nft3000 +
         nft10000 * DAILY_REWARD_BY_NFT.nft10000;
 
-      if (investReward === 0) {
-        console.log("⏭ NFT 없음, 건너뜀:", ref_code);
-        continue;
-      }
+      if (investReward === 0) continue;
 
       const baseFields = {
         reward_date: today,
@@ -61,9 +55,8 @@ export async function calculateAndRecordRewards() {
         name: name || "",
       };
 
-      console.log("📥 reward_invests 저장 시도:", ref_code, investReward);
-
-      const { error: investError } = await supabase.from("reward_invests").upsert(
+      // ✅ reward_invests 저장
+      await supabase.from("reward_invests").upsert(
         {
           ref_code,
           ...baseFields,
@@ -72,32 +65,12 @@ export async function calculateAndRecordRewards() {
           nft10000_qty: nft10000,
           reward_amount: investReward,
         },
-        { onConflict: "ref_code" }
+        { onConflict: "ref_code, reward_date" }
       );
 
-      if (investError) {
-        console.error("❌ reward_invests 저장 실패:", { ref_code, investReward, nft300, nft3000, nft10000, error: investError });
-      } else {
-        console.log("✅ reward_invests 저장 완료:", ref_code, investReward);
-      }
-
-      await supabase.from("rewards").upsert(
-        {
-          ...baseFields,
-          ref_code,
-          ref_by,
-          center_id,
-          reward_type: "invest",
-          role: role || "user",
-          amount: investReward,
-          memo: "NFT 투자 리워드",
-        },
-        { onConflict: "ref_code" }
-      );
-
+      // ✅ 추천인 리워드 계산 및 저장
       if (ref_by && ref_by !== ref_code) {
         const referralReward = investReward * REFERRAL_PERCENT;
-
         const { data: refUser } = await supabase
           .from("users")
           .select("name, wallet_address, role, center_id")
@@ -115,31 +88,13 @@ export async function calculateAndRecordRewards() {
             nft10000_qty: nft10000,
             reward_amount: referralReward,
           },
-          { onConflict: "ref_code" }
+          { onConflict: "ref_code, reward_date" }
         );
-
-        if (refUser) {
-          await supabase.from("rewards").upsert(
-            {
-              reward_date: today,
-              wallet_address: refUser.wallet_address?.toLowerCase() || "",
-              name: refUser.name || "",
-              ref_code: ref_by,
-              ref_by: null,
-              center_id: refUser.center_id || null,
-              reward_type: "referral",
-              role: refUser.role || "user",
-              amount: referralReward,
-              memo: `${ref_code} 피추천 리워드`,
-            },
-            { onConflict: "ref_code" }
-          );
-        }
       }
 
+      // ✅ 센터 리워드 계산 및 저장
       if (center_id && center_id !== ref_code) {
         const centerReward = investReward * CENTER_PERCENT;
-
         const { data: centerUser } = await supabase
           .from("users")
           .select("name, wallet_address, role")
@@ -157,38 +112,21 @@ export async function calculateAndRecordRewards() {
             nft10000_qty: nft10000,
             reward_amount: centerReward,
           },
-          { onConflict: "ref_code" }
+          { onConflict: "ref_code, reward_date" }
         );
-
-        if (centerUser) {
-          await supabase.from("rewards").upsert(
-            {
-              reward_date: today,
-              wallet_address: centerUser.wallet_address?.toLowerCase() || "",
-              name: centerUser.name || "",
-              ref_code: center_id,
-              ref_by: null,
-              center_id: null,
-              reward_type: "center",
-              role: centerUser.role || "center",
-              amount: centerReward,
-              memo: `${ref_code} 소속 센터 리워드`,
-            },
-            { onConflict: "ref_code" }
-          );
-        }
       }
 
       count++;
     }
 
+    // ✅ reward_transfers 저장
     const { data: rewardsToday, error: rewardFetchError } = await supabase
       .from("rewards")
       .select("ref_code, wallet_address, reward_type, amount")
       .eq("reward_date", today);
 
     if (rewardFetchError) {
-      console.error("❌ reward_transfers 산정용 리워드 불러오기 실패:", rewardFetchError.message);
+      console.error("❌ reward_transfers 불러오기 실패:", rewardFetchError.message);
     } else {
       const rewardMap: Record<string, {
         wallet_address: string;
@@ -221,7 +159,7 @@ export async function calculateAndRecordRewards() {
         const r = rewardMap[ref_code];
         const total = r.reward_amount + r.referral_amount + r.center_amount;
 
-        const { error: insertError } = await supabase.from("reward_transfers").upsert(
+        await supabase.from("reward_transfers").upsert(
           {
             ref_code,
             wallet_address: r.wallet_address,
@@ -232,14 +170,8 @@ export async function calculateAndRecordRewards() {
             status: "pending",
             reward_date: today,
           },
-          { onConflict: "ref_code" }
+          { onConflict: "ref_code, reward_date" }
         );
-
-        if (insertError) {
-          console.error(`❌ reward_transfers 저장 실패 - ${ref_code}:`, insertError.message);
-        } else {
-          console.log(`✅ reward_transfers 저장 완료 - ${ref_code} (합계 ${total})`);
-        }
       }
     }
 

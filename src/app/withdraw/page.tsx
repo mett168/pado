@@ -1,10 +1,8 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { useActiveAccount, useActiveWallet } from "thirdweb/react";
+import { useActiveAccount } from "thirdweb/react"; // ✅ 수정
 import { getContract, prepareContractCall, sendTransaction } from "thirdweb";
-// @ts-ignore - 최신 SDK에서 지원되지만 타입 누락
-import { getAccount } from "thirdweb/wallets";
 import { polygon } from "thirdweb/chains";
 import { balanceOf } from "thirdweb/extensions/erc20";
 import { client } from "@/lib/client";
@@ -17,7 +15,6 @@ const USDT_ADDRESS = "0xc2132D05D31c914a87C6611C10748AEb04B58e8F";
 export default function WithdrawPage() {
   const router = useRouter();
   const account = useActiveAccount();
-  const activeWallet = useActiveWallet();
 
   const [balance, setBalance] = useState("0.00");
   const [toAddress, setToAddress] = useState("");
@@ -51,6 +48,11 @@ export default function WithdrawPage() {
   }, [account]);
 
   const handleWithdraw = async () => {
+    if (!account?.address) {
+      setStatus("❌ 로그인 후 이용해 주세요.");
+      return;
+    }
+
     if (!toAddress || !/^0x[a-fA-F0-9]{40}$/.test(toAddress)) {
       setStatus("❌ 받는 주소를 확인하세요");
       return;
@@ -62,16 +64,12 @@ export default function WithdrawPage() {
       return;
     }
 
-    if (!activeWallet || !account) {
-      setStatus("❌ 지갑이 연결되지 않았습니다");
-      return;
-    }
-
     setLoading(true);
     setStatus("출금 처리 중...");
 
     try {
-      const amountInWei = BigInt(Math.floor(amountNumber * 1e6));
+      const walletAddress = account.address.toLowerCase();
+      const amountInWei = BigInt(Math.floor(amountNumber * 10 ** 6));
 
       const tx = prepareContractCall({
         contract,
@@ -79,19 +77,16 @@ export default function WithdrawPage() {
         params: [toAddress, amountInWei],
       });
 
-      const senderAccount = await getAccount(activeWallet); // ✅ Account 추출
-
       const result = await sendTransaction({
+        account,
         transaction: tx,
-        account: senderAccount,
       });
 
       console.log("✅ 트랜잭션 성공:", result.transactionHash);
       setStatus(`✅ 출금 성공! TX: ${result.transactionHash}`);
 
-      const walletAddress = account.address.toLowerCase();
+      // ✅ Supabase 기록
       let refCode = "unknown";
-
       try {
         const { data: user } = await supabase
           .from("users")
@@ -126,7 +121,7 @@ export default function WithdrawPage() {
         fetchBalance();
       }, 2000);
     } catch (err: any) {
-      console.error("❌ 출금 오류:", err);
+      console.error("[X] 출금 오류:", err);
       setStatus(`❌ 실패: ${err.details || err.message}`);
     } finally {
       setLoading(false);
@@ -135,6 +130,7 @@ export default function WithdrawPage() {
 
   return (
     <main className="min-h-screen bg-[#f5f7fa] pb-10">
+      {/* 상단바 */}
       <div className="flex items-center px-4 py-3 bg-white border-b">
         <button onClick={() => router.back()}>
           <ChevronLeft className="w-6 h-6 text-gray-700" />

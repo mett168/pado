@@ -44,35 +44,35 @@ export default function InvitePage() {
   }, [account]);
 
   useEffect(() => {
-    const fetchInviteesFromReferrals = async () => {
+    const fetchInviteesFromUsers = async () => {
       if (!inviteCode) return;
 
       const { data, error } = await supabase
-        .from("reward_referrals")
-        .select("invitee_code, name, reward_amount, reward_date, nft300_qty, nft3000_qty, nft10000_qty")
-        .eq("ref_code", inviteCode)
-        .order("reward_date", { ascending: false });
+        .from("users")
+        .select("ref_code, name, created_at")
+        .eq("ref_by", inviteCode)
+        .order("created_at", { ascending: false });
 
       if (error) {
-        console.error("❌ 초대 데이터 로드 실패:", error.message);
+        console.error("❌ 초대 유저 조회 실패:", error.message);
         return;
       }
 
       if (data) {
         setInvitees(
-          data.map((entry: any) => ({
-            name: entry.name || entry.invitee_code,
-            total_reward: Number(entry.reward_amount),
-            created_at: entry.reward_date,
-            ref_code: entry.invitee_code,
-            nft300: entry.nft300_qty || 0,
-            nft3000: entry.nft3000_qty || 0,
-            nft10000: entry.nft10000_qty || 0,
+          data.map((user: any) => ({
+            name: user.name || user.ref_code,
+            total_reward: 0,
+            created_at: user.created_at,
+            ref_code: user.ref_code,
+            nft300: 0,
+            nft3000: 0,
+            nft10000: 0,
           }))
         );
       }
     };
-    fetchInviteesFromReferrals();
+    fetchInviteesFromUsers();
   }, [inviteCode]);
 
   const handleCopy = async () => {
@@ -160,7 +160,7 @@ export default function InvitePage() {
                     </Link>
                   </div>
                   <div>{user.total_reward.toFixed(1)}</div>
-                  <div>{user.created_at}</div>
+                  <div>{new Date(user.created_at).toLocaleDateString()}</div>
                 </div>
               ))
             ) : (

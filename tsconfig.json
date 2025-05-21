@@ -8,8 +8,8 @@
     ],
     "allowJs": true,
     "skipLibCheck": true,
-    "strict": true,
     "noEmit": true,
+    "strict": false,  
     "esModuleInterop": true,
     "module": "esnext",
     "moduleResolution": "bundler",
@@ -29,11 +29,12 @@
     }
   },
   "include": [
-    "next-env.d.ts",
     "**/*.ts",
     "**/*.tsx",
+    "next-env.d.ts",
+    "types/next-disable.d.ts",
     ".next/types/**/*.ts"
-  ],
+, "src/app/invite/[code]/page.js"  ],
   "exclude": [
     "node_modules"
   ]

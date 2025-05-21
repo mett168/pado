@@ -56,22 +56,22 @@ export default function MyPage() {
     );
   }
 
-  const handleLogout = async () => {
+const handleLogout = async () => {
+  try {
+    // 저장된 지갑 정보 및 세션 삭제
+    localStorage.clear();
+    sessionStorage.clear();
+
+    // (선택) logout 상태 플래그 기록
     localStorage.setItem("logged_out", "true");
-    localStorage.removeItem("thirdweb:active-chain");
-    localStorage.removeItem("thirdweb:active-wallet-id");
-    localStorage.removeItem("thirdweb:connected-wallet-ids");
-    localStorage.removeItem("lastAuthProvider");
 
-    for (const key in localStorage) {
-      if (key.startsWith("walletToken-")) {
-        localStorage.removeItem(key);
-      }
-    }
-
-    await wallet?.disconnect(); // ✅ 수정된 부분
+    // 홈 또는 로그인 페이지로 리디렉션
     window.location.replace("/");
-  };
+  } catch (error) {
+    console.error("❌ 로그아웃 실패:", error);
+    alert("로그아웃 중 문제가 발생했습니다.");
+  }
+};
 
   return (
     <>

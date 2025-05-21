@@ -17,52 +17,57 @@ export default function MainPage() {
   const router = useRouter();
   const [called, setCalled] = useState(false);
 
-  useEffect(() => {
-    if (!account || called) return;
-    setCalled(true);
+useEffect(() => {
+  if (!account || called) return;
+  setCalled(true);
 
-    const referredBy =
-      typeof window !== "undefined"
-        ? new URLSearchParams(window.location.search).get("ref")
-        : null;
+  // ✅ localStorage에서 추천 코드 가져오기
+  let refBy = "SW10100";
+  if (typeof window !== "undefined") {
+    const savedRef = localStorage.getItem("ref_code");
+    if (savedRef) {
+      console.log("✅ 추천 코드 불러옴:", savedRef);
+      refBy = savedRef;
+    }
+  }
 
-    // ✅ /api/register 호출
-    fetch("/api/register", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        wallet_address: account.address.toLowerCase(),
-        referredBy: referredBy || null,
-      }),
+  // ✅ /api/register 호출
+  fetch("/api/register", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      wallet_address: account.address.toLowerCase(),
+      ref_by: refBy,
+    }),
+  })
+    .then((res) => res.json())
+    .then(async () => {
+      const { data: userData } = await supabase
+        .from("users")
+        .select("name")
+        .eq("wallet_address", account.address.toLowerCase())
+        .maybeSingle();
+
+      console.log("👤 유저 name 확인:", userData);
+
+      if (!userData || !userData.name || userData.name.trim() === "") {
+        router.push("/register-info");
+      } else {
+        router.push("/home");
+      }
+
+      if (localStorage.getItem("logged_out") === "true") {
+        localStorage.removeItem("logged_out");
+      }
     })
-      .then((res) => res.json())
-      .then(async () => {
-        // ✅ Supabase에서 유저 정보 확인
-        const { data: userData, error } = await supabase
-          .from("users")
-          .select("name")
-          .eq("wallet_address", account.address.toLowerCase())
-          .maybeSingle();
+    .catch((err) => {
+      console.error("❌ register 요청 실패:", err);
+      toast.error("지갑 등록 실패 ❌ 다시 시도해주세요.");
+    });
+}, [account, called, router]);
 
-        console.log("👤 유저 name 확인:", userData);
-
-        if (!userData || !userData.name || userData.name.trim() === "") {
-          router.push("/register-info");
-        } else {
-          router.push("/home");
-        }
-
-        if (localStorage.getItem("logged_out") === "true") {
-          localStorage.removeItem("logged_out");
-        }
-      })
-      .catch((err) => {
-        console.error("❌ register 요청 실패:", err);
-        toast.error("지갑 등록 실패 ❌ 다시 시도해주세요.");
-      });
-  }, [account, called, router]);
 
   return (
     <>

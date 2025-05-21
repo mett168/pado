@@ -33,7 +33,7 @@ export async function POST(req: NextRequest) {
     wallet_address,
     email = "",  
     phone = "01000000000",
-    ref_by = "SW10100"
+    ref_by = "SW10100", // 추천코드
   } = body;
 
   if (!wallet_address) {
@@ -63,6 +63,27 @@ export async function POST(req: NextRequest) {
     });
   }
 
+  // 🧠 추천인 정보 확인 → 센터 ID 계산
+  let center_id = "SW10100"; // 기본값
+  const { data: referrer, error: referrerError } = await supabase
+    .from("users")
+    .select("role, center_id, ref_code")
+    .eq("ref_code", ref_by)
+    .maybeSingle();
+
+  if (referrerError) {
+    console.error("❌ 추천인 정보 조회 실패:", referrerError.message);
+    return NextResponse.json({ error: "추천인 정보 조회 실패" }, { status: 500 });
+  }
+
+  if (referrer) {
+    if (referrer.role === "center") {
+      center_id = referrer.ref_code;
+    } else {
+      center_id = referrer.center_id || "SW10100";
+    }
+  }
+
   // 🆕 신규 유저 등록
   const newRefCode = await generateNextReferralCode();
 
@@ -74,8 +95,8 @@ export async function POST(req: NextRequest) {
       phone,
       nickname: newRefCode,
       ref_code: newRefCode,
-      ref_by,                         // 추천인 (기본 SW10100)
-      center_id: ref_by,              // 센터 ID = 추천인
+      ref_by,
+      center_id, // ✅ 로직 반영됨
       role: "user",
     })
     .select("id, ref_code, nickname")
