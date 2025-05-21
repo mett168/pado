@@ -59,7 +59,7 @@ export default function InviteDetailClient() {
         <h2 className="font-semibold text-sm text-gray-700 mb-2">친구의 NFT 자산현황</h2>
         <div className="bg-white rounded-xl shadow p-4 flex justify-between">
           <div className="text-center">
-            <img src="/nft-snowbot.PNG" className="w-20 h-20 rounded" alt="NFT300" />
+            <img src="/snow100.png" className="w-20 h-20 rounded" alt="NFT300" />
             <p className="text-xs font-bold mt-2">SNOWBOT 300</p>
             <p className="text-xs text-gray-500">
               보유수량: {summary?.nft300 || 0}개
@@ -67,7 +67,7 @@ export default function InviteDetailClient() {
           </div>
 
           <div className="text-center">
-            <img src="/snowbot3000.PNG" className="w-20 h-20 rounded" alt="NFT3000" />
+            <img src="/snowbot3000.png" className="w-20 h-20 rounded" alt="NFT3000" />
             <p className="text-xs font-bold mt-2">SNOWBOT 3000</p>
             <p className="text-xs text-gray-500">
               보유수량: {summary?.nft3000 || 0}개

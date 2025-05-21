@@ -1,0 +1,13 @@
+{
+  "cron": [
+    {
+      "path": "/api/snapshot",
+      "schedule": "55 22 * * *"    // 오전 7:55
+    },
+    {
+      "path": "/api/send-rewards",
+      "schedule": "25 23 * * *"    // 오전 8:25
+    }
+  ]
+}
+

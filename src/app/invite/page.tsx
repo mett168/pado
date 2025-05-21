@@ -86,28 +86,6 @@ export default function InvitePage() {
     }
   };
 
-  const handleSnapshot = async () => {
-    try {
-      const res = await fetch("/api/snapshot", { method: "POST" });
-      const result = await res.json();
-      alert("✅ 스냅샷 완료: " + JSON.stringify(result));
-    } catch (err) {
-      alert("❌ 스냅샷 실패");
-      console.error(err);
-    }
-  };
-
-  const handleTransferTest = async () => {
-    try {
-      const res = await fetch("/api/send-rewards", { method: "POST" });
-      const result = await res.json();
-      alert("✅ 리워드 송금 완료: " + JSON.stringify(result));
-    } catch (err) {
-      alert("❌ 리워드 송금 실패");
-      console.error(err);
-    }
-  };
-
   return (
     <>
       <TopBar title="친구초대" showBack />
@@ -166,21 +144,6 @@ export default function InvitePage() {
             ) : (
               <p className="py-6 text-center text-gray-400">초대한 친구가 없습니다.</p>
             )}
-          </div>
-
-          <div className="mt-6 space-y-3">
-            <button
-              onClick={handleSnapshot}
-              className="w-full bg-green-600 text-white py-2 rounded-lg text-sm font-semibold"
-            >
-              📸 스냅샷 테스트
-            </button>
-            <button
-              onClick={handleTransferTest}
-              className="w-full bg-blue-600 text-white py-2 rounded-lg text-sm font-semibold"
-            >
-              💸 리워드 송금 테스트
-            </button>
           </div>
         </div>
         <BottomNav />
