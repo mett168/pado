@@ -1,9 +1,10 @@
+// src/app/invite-detail/page.tsx
 import { Suspense } from "react";
-import InviteDetailClient from "./InviteDetailClient"; // 👈 클라이언트 컴포넌트로 분리
+import InviteDetailClient from "./InviteDetailClient";
 
 export default function InviteDetailPage() {
   return (
-    <Suspense fallback={<div className="text-center py-10 text-gray-400">로딩 중...</div>}>
+    <Suspense fallback={<p className="text-center text-gray-400 mt-20">로딩 중...</p>}>
       <InviteDetailClient />
     </Suspense>
   );
