@@ -122,11 +122,16 @@ export async function calculateAndRecordRewards() {
       }
     }
 
-    // ✅ 저장 순서: rewards → reward_* → reward_transfers
+    console.log("✅ rewardsToInsert 길이:", rewardsToInsert.length);
+    console.log("📦 rewardsToInsert 내용:", rewardsToInsert);
+
     if (rewardsToInsert.length > 0) {
-      await supabase.from("rewards").upsert(rewardsToInsert, {
+      const { error: rewardInsertError } = await supabase.from("rewards").upsert(rewardsToInsert, {
         onConflict: "ref_code, reward_type, reward_date",
       });
+      if (rewardInsertError) {
+        console.error("❌ rewards 저장 오류:", rewardInsertError.message);
+      }
     }
 
     if (rewardInvests.length > 0) {
