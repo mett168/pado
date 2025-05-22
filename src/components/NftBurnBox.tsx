@@ -88,7 +88,7 @@ export function NftBurnBox({
   };
 
   return (
-    <div className="bg-white rounded-2xl shadow-md p-4 mt-6">
+    <div className="bg-white rounded-2xl shadow-md p-4 mt-2">
       <input
         type="number"
         placeholder="해지 수량을 입력하세요."

@@ -197,25 +197,26 @@ export default function HomePage() {
   return (
     <main className="w-full min-h-screen bg-[#f5f7fa] pt-0 pb-20">
       <TopBar icon={<Home size={20} className="text-gray-700" />} title="홈" />
-      <div className="max-w-[500px] mx-auto px-2 pt-2 space-y-2">
+      <div className="max-w-[500px] mx-auto px-3 pt-2 space-y-2">
         {/* 오늘의 리워드 */}
-        <section className="bg-white rounded-xl shadow p-3">
-          <div className="flex justify-between items-center mb-3">
-            <h3 className="text-lg font-bold text-gray-800">오늘의 리워드</h3>
-            <p className="text-2xl font-bold text-black">{(investReward + referralReward).toFixed(2)} USDT</p>
-          </div>
-          <div className="text-sm space-y-1">
-            <p className="flex justify-between">
-              <span className="text-gray-500">투자리워드</span>
-              <span className="font-semibold text-gray-800">{investReward.toFixed(2)} USDT</span>
-            </p>
-            <p className="flex justify-between">
-              <span className="text-gray-500">추천리워드</span>
-              <span className="font-semibold text-gray-800">{referralReward.toFixed(2)} USDT</span>
-            </p>
-          </div>
-          <p className="mt-2 text-xs text-gray-400">※ 매일 오전 9시 이전에 자동 입금됩니다.</p>
-        </section>
+        <section className="bg-white rounded-xl shadow px-4 py-2">
+  <div className="flex justify-between items-center mb-2">
+    <h3 className="text-lg font-bold text-gray-800">오늘의 리워드</h3>
+    <p className="text-2xl font-bold text-black">{(investReward + referralReward).toFixed(2)} USDT</p>
+  </div>
+  <div className="text-sm space-y-1">
+    <p className="flex justify-between">
+      <span className="text-gray-500">투자리워드</span>
+      <span className="font-semibold text-gray-800">{investReward.toFixed(2)} USDT</span>
+    </p>
+    <p className="flex justify-between">
+      <span className="text-gray-500">추천리워드</span>
+      <span className="font-semibold text-gray-800">{referralReward.toFixed(2)} USDT</span>
+    </p>
+  </div>
+  <p className="mt-1 text-xs text-gray-400">※ 매일 오전 9시 이전에 자동 입금됩니다.</p>
+</section>
+
 
         {/* 지갑 주소 */}
         <section className="bg-white rounded-xl shadow overflow-hidden">
@@ -231,7 +232,7 @@ export default function HomePage() {
             </p>
             <button
               onClick={handleCopy}
-              className="flex items-center justify-center w-full bg-blue-100 text-blue-700 py-1.5 rounded-md text-[12px] font-semibold hover:bg-blue-200"
+              className="flex items-center justify-center w-full bg-blue-100 text-blue-700 py-1.5 rounded-md text-sm font-semibold hover:bg-blue-200"
             >
               <Copy className="w-4 h-4 mr-1" /> 주소 복사하기
             </button>
@@ -251,7 +252,7 @@ export default function HomePage() {
     </div>
     <button
       onClick={() => router.push("/withdraw")}
-      className="w-full bg-blue-100 text-blue-700 py-1.5 rounded-md text-[12px] font-semibold hover:bg-blue-200 mb-0"
+      className="w-full bg-blue-100 text-blue-700 py-1.5 rounded-md text-sm font-semibold hover:bg-blue-200 mb-0"
     >
       출금하기
     </button>

@@ -16,7 +16,7 @@ export default function NftMainPage() {
 
       {/* ✅ 홈과 동일하게 main은 전체폭, 내부 콘텐츠만 정렬 */}
       <main className="min-h-screen bg-[#f4f6f9] pb-20 w-full">
-        <div className="px-4 pt-4 space-y-2 max-w-[500px] mx-auto">
+        <div className="px-3 pt-4 space-y-2 max-w-[500px] mx-auto">
           {/* 탭 버튼 */}
           <div className="flex gap-x-2 mb-4 mt-4">
             <button

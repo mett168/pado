@@ -50,33 +50,40 @@ export default function NftPage10000() {
   return (
     <main className="min-h-screen bg-[#f4f6f9] pb-24 px-0 pt-4 max-w-[500px] mx-auto relative">
       <section className="space-y-4">
-        {/* 카드 박스 */}
-        <div className="bg-green-100 origin-top-left rounded-2xl shadow-md p-6">
-          <div className="flex items-center space-x-6">
-            <img src="/snowbot10000.png" alt="SNOWBOT 10000" className="w-24 h-24 rounded-xl border" />
-            <div className="flex-1">
-              <div className="flex justify-between items-center">
-                <span className="text-gray-800 text-sm font-semibold">이름</span>
-                <span className="font-semibold text-gray-800 text-lg">SNOW BOT 10000</span>
-              </div>
-              <div className="flex justify-between items-center mt-1">
-                <span className="text-gray-800 text-sm font-semibold">총 수량</span>
-                <span className="text-base text-gray-800 font-semibold">
-                  {loading ? "조회 중..." : nftCount ?? 0}
+        {/* ✅ 카드 박스 */}
+        <div className="bg-[#DDF0F5] origin-top-left rounded-2xl shadow-md p-5">
+          <div className="flex items-center gap-4">
+            <img
+              src="/snowbot10000.png"
+              alt="SNOWBOT 10000"
+              className="w-20 h-20 rounded-xl border"
+            />
+            <div className="flex-1 text-sm font-semibold text-gray-800 space-y-1">
+              {/* 이름 */}
+              <p>SNOWBOT 10000</p>
+
+              {/* 보유 수량 */}
+              <p>
+                보유 수량:{" "}
+                <span className="text-blue-600">
+                  {loading ? "조회 중..." : `${nftCount ?? 0}개`}
                 </span>
-              </div>
+              </p>
+
               {error && <p className="text-xs text-red-500 mt-1">{error}</p>}
             </div>
           </div>
         </div>
 
+        {/* ✅ 양도 신청 */}
         <div>
-          <p className="text-sm font-semibold text-gray-800 mb-1">양도 신청</p>
+          <p className="text-md font-semibold text-gray-800 mb-1 pl-2">양도 신청</p>
           <NftTransferBox account={account} onTransferComplete={fetchNFTBalance} nftType="nft10000" />
         </div>
 
+        {/* ✅ 해지 신청 */}
         <div>
-          <p className="text-sm font-semibold text-gray-800 mb-1">해지 신청</p>
+          <p className="text-md font-semibold text-gray-800 mb-1 pl-2">해지 신청</p>
           <NftBurnBox account={account} onBurnComplete={fetchNFTBalance} nftType="nft10000" />
         </div>
       </section>
