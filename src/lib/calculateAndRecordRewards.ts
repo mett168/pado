@@ -27,8 +27,10 @@ export async function calculateAndRecordRewards() {
     for (const user of users) {
       const { ref_code, name, ref_by, center_id, wallet_address, role } = user;
       const lowerAddress = wallet_address?.toLowerCase();
+
       console.log("➡️ 유저 처리 시작:", ref_code);
 
+      // ✅ NFT 수량 조회
       const { data: nftRow, error: nftError } = await supabase
         .from("nfts")
         .select("nft300, nft3000, nft10000")
@@ -44,15 +46,15 @@ export async function calculateAndRecordRewards() {
       const nft3000 = nftRow?.nft3000 || 0;
       const nft10000 = nftRow?.nft10000 || 0;
 
-      const investReward =
-        nft300 * DAILY_REWARD_BY_NFT.nft300 +
-        nft3000 * DAILY_REWARD_BY_NFT.nft3000 +
-        nft10000 * DAILY_REWARD_BY_NFT.nft10000;
+      const investReward = Number(
+        (
+          nft300 * DAILY_REWARD_BY_NFT.nft300 +
+          nft3000 * DAILY_REWARD_BY_NFT.nft3000 +
+          nft10000 * DAILY_REWARD_BY_NFT.nft10000
+        ).toFixed(3)
+      );
 
-      if (investReward === 0) {
-        console.log("⏭ NFT 없음, 건너뜀:", ref_code);
-        continue;
-      }
+      if (investReward === 0) continue;
 
       const baseFields = {
         reward_date: today,
@@ -60,30 +62,65 @@ export async function calculateAndRecordRewards() {
         name: name || "",
       };
 
-      await supabase.from("reward_invests").upsert({
-        ref_code,
-        ...baseFields,
-        nft300_qty: nft300,
-        nft3000_qty: nft3000,
-        nft10000_qty: nft10000,
-        reward_amount: investReward,
-      }, { onConflict: ["ref_code", "reward_date"] });
+      // ✅ 보완: 저장 시도 로그
+      console.log("📥 reward_invests 저장 시도:", ref_code, investReward);
 
-      await supabase.from("rewards").upsert({
-        ...baseFields,
-        ref_code,
-        ref_by,
-        center_id,
-        reward_type: "invest",
-        role: role || "user",
-        amount: investReward,
-        memo: "NFT 투자 리워드",
-      }, { onConflict: ["ref_code", "reward_type", "reward_date"] });
+      // ✅ 1. 투자 리워드 저장 (먼저 데이터 확인 후 삽입)
+      const { data: existingInvestReward } = await supabase
+        .from("reward_invests")
+        .select("*")
+        .eq("ref_code", ref_code)
+        .eq("reward_date", today)
+        .single();
+
+      if (!existingInvestReward) {
+        await supabase.from("reward_invests").insert([
+          {
+            ref_code,
+            ...baseFields,
+            nft300_qty: nft300,
+            nft3000_qty: nft3000,
+            nft10000_qty: nft10000,
+            reward_amount: investReward,
+          },
+        ]);
+      } else {
+        await supabase.from("reward_invests").update({
+          reward_amount: investReward,
+        }).eq("ref_code", ref_code).eq("reward_date", today);
+      }
+
+      // ✅ 1-2. 전체 리워드에도 저장 (먼저 데이터 확인 후 삽입)
+      const { data: existingReward } = await supabase
+        .from("rewards")
+        .select("*")
+        .eq("ref_code", ref_code)
+        .eq("reward_type", "invest")
+        .eq("reward_date", today)
+        .single();
+
+      if (!existingReward) {
+        await supabase.from("rewards").insert([
+          {
+            ...baseFields,
+            ref_code,
+            ref_by,
+            center_id,
+            reward_type: "invest",
+            role: role || "user",
+            amount: investReward,
+            memo: "NFT 투자 리워드",
+          },
+        ]);
+      } else {
+        await supabase.from("rewards").update({
+          amount: investReward,
+        }).eq("ref_code", ref_code).eq("reward_type", "invest").eq("reward_date", today);
+      }
 
       count++;
     }
 
-    // ✅ 내가 추천한 유저가 있을 경우 추천 리워드 계산
     for (const referrer of users) {
       const refCode = referrer.ref_code;
       const refName = referrer.name;
@@ -106,41 +143,63 @@ export async function calculateAndRecordRewards() {
 
         if (!nftRow) continue;
 
-        const investReward =
+        const investReward = 
           (nftRow.nft300 || 0) * DAILY_REWARD_BY_NFT.nft300 +
           (nftRow.nft3000 || 0) * DAILY_REWARD_BY_NFT.nft3000 +
           (nftRow.nft10000 || 0) * DAILY_REWARD_BY_NFT.nft10000;
 
-        const referralReward = investReward * REFERRAL_PERCENT;
+        const referralReward = Number((investReward * REFERRAL_PERCENT).toFixed(3));
         referralTotal += referralReward;
 
-        await supabase.from("reward_referrals").upsert({
-          ref_code: refCode,
-          invitee_code: invitee.ref_code,
-          name: refName,
-          reward_date: today,
-          nft300_qty: nftRow.nft300 || 0,
-          nft3000_qty: nftRow.nft3000 || 0,
-          nft10000_qty: nftRow.nft10000 || 0,
-          reward_amount: referralReward,
-        }, { onConflict: "ref_code,invitee_code,reward_date" });
-      }
+        const { data: existingReferral } = await supabase
+          .from("reward_referrals")
+          .select("*")
+          .eq("ref_code", refCode)
+          .eq("invitee_code", invitee.ref_code)
+          .eq("reward_date", today)
+          .single();
 
-      if (referralTotal > 0) {
-        await supabase.from("rewards").upsert({
-          reward_date: today,
-          wallet_address: refWallet,
-          name: refName,
-          ref_code: refCode,
-          reward_type: "referral",
-          role: refRole,
-          amount: referralTotal,
-          memo: `직접 초대한 유저 ${invitees?.length || 0}명 추천 리워드`,
-        }, { onConflict: ["ref_code", "reward_type", "reward_date"] });
+        if (!existingReferral) {
+          await supabase.from("reward_referrals").insert([
+            {
+              ref_code: refCode,
+              invitee_code: invitee.ref_code,
+              name: refName,
+              reward_date: today,
+              nft300_qty: nftRow.nft300 || 0,
+              nft3000_qty: nftRow.nft3000 || 0,
+              nft10000_qty: nftRow.nft10000 || 0,
+              reward_amount: referralReward,
+            },
+          ]);
+        }
+
+        // 전체 리워드에도 저장 (먼저 데이터 확인 후 삽입)
+        const { data: existingReferralReward } = await supabase
+          .from("rewards")
+          .select("*")
+          .eq("ref_code", refCode)
+          .eq("reward_type", "referral")
+          .eq("reward_date", today)
+          .single();
+
+        if (!existingReferralReward) {
+          await supabase.from("rewards").insert([
+            {
+              reward_date: today,
+              wallet_address: refWallet,
+              name: refName,
+              ref_code: refCode,
+              reward_type: "referral",
+              role: refRole,
+              amount: referralTotal,
+              memo: `직접 초대한 유저 ${invitees?.length || 0}명 추천 리워드`,
+            },
+          ]);
+        }
       }
     }
 
-    // ✅ 내가 센터장인 경우, 하위 멤버 기준으로 센터 리워드 계산
     for (const centerUser of users) {
       const myRefCode = centerUser.ref_code;
       const myName = centerUser.name;
@@ -168,32 +227,54 @@ export async function calculateAndRecordRewards() {
           (nftRow.nft3000 || 0) * DAILY_REWARD_BY_NFT.nft3000 +
           (nftRow.nft10000 || 0) * DAILY_REWARD_BY_NFT.nft10000;
 
-        const centerReward = memberReward * CENTER_PERCENT;
+        const centerReward = Number((memberReward * CENTER_PERCENT).toFixed(3));
         centerTotal += centerReward;
 
-        await supabase.from("reward_centers").upsert({
-          ref_code: myRefCode,
-          member_code: member.ref_code,
-          name: myName,
-          reward_date: today,
-          nft300_qty: nftRow.nft300 || 0,
-          nft3000_qty: nftRow.nft3000 || 0,
-          nft10000_qty: nftRow.nft10000 || 0,
-          reward_amount: centerReward,
-        }, { onConflict: "ref_code,member_code,reward_date" });
-      }
+        const { data: existingCenterReward } = await supabase
+          .from("reward_centers")
+          .select("*")
+          .eq("ref_code", myRefCode)
+          .eq("member_code", member.ref_code)
+          .eq("reward_date", today)
+          .single();
 
-      if (centerTotal > 0) {
-        await supabase.from("rewards").upsert({
-          reward_date: today,
-          wallet_address: myWallet,
-          name: myName,
-          ref_code: myRefCode,
-          reward_type: "center",
-          role: myRole,
-          amount: centerTotal,
-          memo: `소속 유저 ${myMembers?.length || 0}명 센터 리워드`,
-        }, { onConflict: ["ref_code", "reward_type", "reward_date"] });
+        if (!existingCenterReward) {
+          await supabase.from("reward_centers").insert([
+            {
+              ref_code: myRefCode,
+              member_code: member.ref_code,
+              name: myName,
+              reward_date: today,
+              nft300_qty: nftRow.nft300 || 0,
+              nft3000_qty: nftRow.nft3000 || 0,
+              nft10000_qty: nftRow.nft10000 || 0,
+              reward_amount: centerReward,
+            },
+          ]);
+        }
+
+        const { data: existingCenterRewardInRewards } = await supabase
+          .from("rewards")
+          .select("*")
+          .eq("ref_code", myRefCode)
+          .eq("reward_type", "center")
+          .eq("reward_date", today)
+          .single();
+
+        if (!existingCenterRewardInRewards) {
+          await supabase.from("rewards").insert([
+            {
+              reward_date: today,
+              wallet_address: myWallet,
+              name: myName,
+              ref_code: myRefCode,
+              reward_type: "center",
+              role: myRole,
+              amount: centerTotal,
+              memo: `소속 유저 ${myMembers?.length || 0}명 센터 리워드`,
+            },
+          ]);
+        }
       }
     }
 
