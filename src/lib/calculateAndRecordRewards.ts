@@ -125,8 +125,16 @@ export async function calculateAndRecordRewards() {
     console.log("✅ rewardsToInsert 길이:", rewardsToInsert.length);
     console.log("📦 rewardsToInsert 내용:", rewardsToInsert);
 
-    if (rewardsToInsert.length > 0) {
-      const { error: rewardInsertError } = await supabase.from("rewards").upsert(rewardsToInsert, {
+    // ✅ 중복 제거
+    const uniqueRewards = new Map();
+    for (const reward of rewardsToInsert) {
+      const key = `${reward.ref_code}_${reward.reward_type}_${reward.reward_date}`;
+      uniqueRewards.set(key, reward);
+    }
+    const deduplicatedRewardsToInsert = Array.from(uniqueRewards.values());
+
+    if (deduplicatedRewardsToInsert.length > 0) {
+      const { error: rewardInsertError } = await supabase.from("rewards").upsert(deduplicatedRewardsToInsert, {
         onConflict: "ref_code, reward_type, reward_date",
       });
       if (rewardInsertError) {
@@ -203,7 +211,7 @@ export async function calculateAndRecordRewards() {
       );
     }
 
-    console.log(`✅ 총 ${rewardsToInsert.length}건의 리워드 저장 완료`);
+    console.log(`✅ 총 ${deduplicatedRewardsToInsert.length}건의 리워드 저장 완료`);
     return { success: true, date: today };
   } catch (err: any) {
     console.error("❌ 리워드 계산 오류:", err?.message || err);
