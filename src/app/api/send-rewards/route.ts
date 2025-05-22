@@ -6,6 +6,9 @@ import { getTodayDate } from "@/lib/dateUtil";
 export async function POST() {
   const today = getTodayDate();
 
+  // ✅ [추가] 자동 실행 로그
+  console.log("✅ [CRON] /api/send-rewards 실행됨:", new Date().toISOString());
+
   console.log("📆 오늘 날짜:", today);
 
   // ✅ 1. 오늘 기준 reward_transfers에서 pending 또는 failed 상태 모두 포함
@@ -13,7 +16,7 @@ export async function POST() {
     .from("reward_transfers")
     .select("ref_code, wallet_address, reward_amount, referral_amount, center_amount, total_amount")
     .eq("reward_date", today)
-    .in("status", ["pending", "failed"]); // ✅ 보완됨
+    .in("status", ["pending", "failed"]);
 
   if (error || !transfers) {
     console.error("❌ 송금 대상 불러오기 실패:", error);

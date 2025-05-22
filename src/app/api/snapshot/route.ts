@@ -12,6 +12,9 @@ export async function POST() {
   try {
     const today = getTodayDate();
 
+    // ✅ 로그 추가: 크론 실행 여부 확인용
+    console.log("✅ [CRON] /api/snapshot 실행됨:", new Date().toISOString());
+
     // ✅ 1. 리워드 계산
     const result = await calculateAndRecordRewards();
     if (!result.success) {
