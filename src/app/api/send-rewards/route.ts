@@ -3,15 +3,16 @@ import { NextResponse } from "next/server";
 import { sendUSDT } from "@/lib/sendUSDT";
 import { getTodayDate } from "@/lib/dateUtil";
 
+// ✅ GET 요청도 POST 로직으로 처리
+export async function GET() {
+  return await POST();
+}
+
 export async function POST() {
   const today = getTodayDate();
-
-  // ✅ [추가] 자동 실행 로그
   console.log("✅ [CRON] /api/send-rewards 실행됨:", new Date().toISOString());
-
   console.log("📆 오늘 날짜:", today);
 
-  // ✅ 1. 오늘 기준 reward_transfers에서 pending 또는 failed 상태 모두 포함
   const { data: transfers, error } = await supabase
     .from("reward_transfers")
     .select("ref_code, wallet_address, reward_amount, referral_amount, center_amount, total_amount")

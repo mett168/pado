@@ -8,24 +8,24 @@ function getTodayDate() {
   return now.toISOString().split("T")[0];
 }
 
+// ✅ GET 요청도 POST 로직으로 처리
+export async function GET() {
+  return await POST();
+}
+
 export async function POST() {
   try {
     const today = getTodayDate();
-
-    // ✅ 로그 추가: 크론 실행 여부 확인용
     console.log("✅ [CRON] /api/snapshot 실행됨:", new Date().toISOString());
 
-    // ✅ 1. 리워드 계산
     const result = await calculateAndRecordRewards();
     if (!result.success) {
       console.error("❌ 리워드 계산 실패:", result.error);
       return NextResponse.json({ error: "리워드 계산 실패", detail: result }, { status: 500 });
     }
 
-    // ✅ 2. reward_transfers snapshot 저장
     await saveRewardTransfersSnapshot();
 
-    // ✅ 완료
     return NextResponse.json({ success: true, date: today });
 
   } catch (err: any) {
