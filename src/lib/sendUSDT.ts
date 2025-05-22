@@ -12,7 +12,7 @@ const USDT_ABI = [
   {
     name: "transfer",
     type: "function",
-    stateMutability: "nonpayable", // ✅ 필수!!
+    stateMutability: "nonpayable",
     inputs: [
       { name: "_to", type: "address" },
       { name: "_value", type: "uint256" }
@@ -22,6 +22,11 @@ const USDT_ABI = [
     ]
   }
 ] as const;
+
+function getTodayDate() {
+  const now = new Date();
+  return now.toISOString().split("T")[0];
+}
 
 export async function sendUSDT(to: string, amount: number) {
   console.log("🚀 [sendUSDT] 호출됨");
@@ -81,6 +86,8 @@ export async function sendUSDT(to: string, amount: number) {
 
     console.log("🎉 [전송 성공] 트랜잭션 해시:", txHash);
 
+    const today = getTodayDate();
+
     const { data: user, error: userError } = await supabase
       .from("users")
       .select("ref_code")
@@ -93,19 +100,36 @@ export async function sendUSDT(to: string, amount: number) {
 
     const refCode = user?.ref_code || "unknown";
 
+    // ✅ usdt_history 기록
     const { error: insertError } = await supabase.from("usdt_history").insert({
       ref_code: refCode,
       direction: "out",
       amount: amount,
       tx_hash: txHash,
       status: "completed",
+      reward_date: today,
     });
 
     if (insertError) {
       console.warn("⚠️ [기록 저장 오류]:", insertError.message);
     }
 
-    console.log("📝 [기록 완료] usdt_history 저장됨");
+    // ✅ reward_transfers 상태 업데이트
+    const { error: updateError } = await supabase
+      .from("reward_transfers")
+      .update({
+        status: "success",
+        executed_at: new Date().toISOString(),
+        tx_hash: txHash,
+      })
+      .eq("ref_code", refCode)
+      .eq("reward_date", today);
+
+    if (updateError) {
+      console.warn("⚠️ [reward_transfers 업데이트 오류]:", updateError.message);
+    }
+
+    console.log("📝 [기록 완료] usdt_history + reward_transfers 업데이트 완료");
 
     return { transactionHash: txHash };
   } catch (error: any) {
