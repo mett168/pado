@@ -10,6 +10,10 @@ function getTodayDate() {
   return now.toISOString().split("T")[0];
 }
 
+function roundToThree(num: number): number {
+  return Math.round(num * 1000) / 1000;
+}
+
 export async function calculateAndRecordRewards() {
   try {
     console.log("🧮 리워드 계산 시작");
@@ -17,7 +21,7 @@ export async function calculateAndRecordRewards() {
 
     const { data: users, error: userError } = await supabase
       .from("users")
-      .select("ref_code, name, wallet_address, ref_by, center_id");
+      .select("ref_code, name, wallet_address, ref_by, center_id, role");
 
     if (userError || !users) throw new Error("유저 조회 실패");
 
@@ -27,7 +31,7 @@ export async function calculateAndRecordRewards() {
     const rewardCenters: any[] = [];
 
     for (const user of users) {
-      const { ref_code, name, wallet_address, ref_by, center_id } = user;
+      const { ref_code, name, wallet_address, ref_by, center_id, role } = user;
       const lowerAddress = wallet_address?.toLowerCase();
 
       const { data: nftRow } = await supabase
@@ -40,10 +44,11 @@ export async function calculateAndRecordRewards() {
       const nft3000 = nftRow?.nft3000 || 0;
       const nft10000 = nftRow?.nft10000 || 0;
 
-      const investReward =
+      const investReward = roundToThree(
         nft300 * DAILY_REWARD_BY_NFT.nft300 +
         nft3000 * DAILY_REWARD_BY_NFT.nft3000 +
-        nft10000 * DAILY_REWARD_BY_NFT.nft10000;
+        nft10000 * DAILY_REWARD_BY_NFT.nft10000
+      );
 
       if (investReward === 0) continue;
 
@@ -53,12 +58,17 @@ export async function calculateAndRecordRewards() {
         reward_type: "invest",
         amount: investReward,
         reward_date: today,
+        ref_by,
+        center_id,
+        role,
+        name: name || null,
       });
 
       rewardInvests.push({
         ref_code,
         name: name || "",
         reward_date: today,
+        wallet_address: lowerAddress,
         nft300_qty: nft300,
         nft3000_qty: nft3000,
         nft10000_qty: nft10000,
@@ -66,10 +76,10 @@ export async function calculateAndRecordRewards() {
       });
 
       if (ref_by && ref_by !== ref_code) {
-        const referralReward = investReward * REFERRAL_PERCENT;
+        const referralReward = roundToThree(investReward * REFERRAL_PERCENT);
         const { data: refUser } = await supabase
           .from("users")
-          .select("name, wallet_address")
+          .select("name, wallet_address, role, center_id")
           .eq("ref_code", ref_by)
           .maybeSingle();
 
@@ -79,6 +89,10 @@ export async function calculateAndRecordRewards() {
           reward_type: "referral",
           amount: referralReward,
           reward_date: today,
+          ref_by,
+          center_id: refUser?.center_id || null,
+          role: refUser?.role || null,
+          name: refUser?.name || null,
         });
 
         rewardReferrals.push({
@@ -94,10 +108,10 @@ export async function calculateAndRecordRewards() {
       }
 
       if (center_id && center_id !== ref_code) {
-        const centerReward = investReward * CENTER_PERCENT;
+        const centerReward = roundToThree(investReward * CENTER_PERCENT);
         const { data: centerUser } = await supabase
           .from("users")
-          .select("name, wallet_address")
+          .select("name, wallet_address, role")
           .eq("ref_code", center_id)
           .maybeSingle();
 
@@ -107,6 +121,10 @@ export async function calculateAndRecordRewards() {
           reward_type: "center",
           amount: centerReward,
           reward_date: today,
+          ref_by,
+          center_id,
+          role: centerUser?.role || null,
+          name: centerUser?.name || null,
         });
 
         rewardCenters.push({
@@ -125,7 +143,6 @@ export async function calculateAndRecordRewards() {
     console.log("✅ rewardsToInsert 길이:", rewardsToInsert.length);
     console.log("📦 rewardsToInsert 내용:", rewardsToInsert);
 
-    // ✅ 중복 제거
     const uniqueRewards = new Map();
     for (const reward of rewardsToInsert) {
       const key = `${reward.ref_code}_${reward.reward_type}_${reward.reward_date}`;
@@ -176,7 +193,7 @@ export async function calculateAndRecordRewards() {
       const ref = row.ref_code;
       const wallet = row.wallet_address;
       const type = row.reward_type;
-      const amt = Number(row.amount) || 0;
+      const amt = roundToThree(Number(row.amount) || 0);
 
       if (!rewardMap[ref]) {
         rewardMap[ref] = {
@@ -194,15 +211,15 @@ export async function calculateAndRecordRewards() {
 
     for (const ref_code in rewardMap) {
       const r = rewardMap[ref_code];
-      const total = r.reward_amount + r.referral_amount + r.center_amount;
+      const total = roundToThree(r.reward_amount + r.referral_amount + r.center_amount);
 
       await supabase.from("reward_transfers").upsert(
         {
           ref_code,
           wallet_address: r.wallet_address,
-          reward_amount: r.reward_amount,
-          referral_amount: r.referral_amount,
-          center_amount: r.center_amount,
+          reward_amount: roundToThree(r.reward_amount),
+          referral_amount: roundToThree(r.referral_amount),
+          center_amount: roundToThree(r.center_amount),
           total_amount: total,
           status: "pending",
           reward_date: today,
