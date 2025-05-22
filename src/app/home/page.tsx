@@ -15,7 +15,6 @@ import { client } from "@/lib/client";
 import { supabase } from "@/lib/supabaseClient";
 import { useSession } from "@supabase/auth-helpers-react";
 
-// ✅ 여기에 추가!
 type NFTType = "nft300" | "nft3000" | "nft10000";
 
 const USDT_ADDRESS = "0xc2132D05D31c914a87C6611C10748AEb04B58e8F";
@@ -31,10 +30,10 @@ export default function HomePage() {
   const [nickname, setNickname] = useState("");
   const [name, setName] = useState("");
   const [nftBalances, setNftBalances] = useState<Record<NFTType, number>>({
-  nft300: 0,
-  nft3000: 0,
-  nft10000: 0,
-});
+    nft300: 0,
+    nft3000: 0,
+    nft10000: 0,
+  });
   const [investReward, setInvestReward] = useState(0);
   const [referralReward, setReferralReward] = useState(0);
 
@@ -68,7 +67,6 @@ export default function HomePage() {
             .select("ref_code")
             .eq("wallet_address", walletAddress)
             .single();
-
           if (user?.ref_code) refCode = user.ref_code;
         } catch (err) {
           console.warn("❌ ref_code 조회 실패", err);
@@ -120,7 +118,6 @@ export default function HomePage() {
       .select("ref_code")
       .eq("wallet_address", address)
       .maybeSingle();
-
     if (!user?.ref_code) return;
 
     const { data, error } = await supabase
@@ -155,7 +152,6 @@ export default function HomePage() {
       .select("ref_code, ref_by, center_id")
       .eq("wallet_address", lowerAddress)
       .maybeSingle();
-
     if (!user || !user.ref_code) return;
 
     const balances = await getOnchainNFTBalances(
@@ -201,9 +197,10 @@ export default function HomePage() {
   return (
     <main className="w-full min-h-screen bg-[#f5f7fa] pt-0 pb-20">
       <TopBar icon={<Home size={20} className="text-gray-700" />} title="홈" />
-      <div className="max-w-[500px] mx-auto px-4 pt-4 space-y-2">
-        <section className="bg-white rounded-xl shadow p-4">
-          <div className="flex justify-between items-center mb-4">
+      <div className="max-w-[500px] mx-auto px-2 pt-2 space-y-2">
+        {/* 오늘의 리워드 */}
+        <section className="bg-white rounded-xl shadow p-3">
+          <div className="flex justify-between items-center mb-3">
             <h3 className="text-lg font-bold text-gray-800">오늘의 리워드</h3>
             <p className="text-2xl font-bold text-black">{(investReward + referralReward).toFixed(2)} USDT</p>
           </div>
@@ -220,43 +217,51 @@ export default function HomePage() {
           <p className="mt-2 text-xs text-gray-400">※ 매일 오전 9시 이전에 자동 입금됩니다.</p>
         </section>
 
+        {/* 지갑 주소 */}
         <section className="bg-white rounded-xl shadow overflow-hidden">
-          <div className="bg-blue-600 text-white text-sm font-semibold px-4 py-2 flex justify-between items-center">
-            <span>나의 지갑 입금 주소</span>
-            <span>
-              {name ? `${name}님, 반갑습니다.` :
-               nickname ? `${nickname}님, 반갑습니다.` :
-               `${address.slice(0, 6)}...${address.slice(-4)}님`}
-            </span>
+          <div className="bg-blue-600 text-white text-md font-semibold px-4 py-1">
+            나의 지갑 입금 주소
           </div>
-          <div className="p-4 text-center">
-            <p className="text-sm font-mono text-gray-800 break-all mb-2">{address}</p>
-            <p className="text-xs text-gray-500 mb-4">※ 해당 주소는 POLYGON 체인의 USDT 입금만 지원합니다.</p>
-            <button onClick={handleCopy} className="flex items-center justify-center w-full bg-blue-100 text-blue-700 py-2 rounded-full text-sm font-semibold hover:bg-blue-200">
+          <div className="p-3 text-center">
+            <p className="text-[11px] font-mono text-gray-800 whitespace-nowrap overflow-hidden text-ellipsis mb-1">
+              {address}
+            </p>
+            <p className="text-[10px] text-gray-500 whitespace-nowrap overflow-hidden text-ellipsis mb-2">
+              ※ 해당 주소는 POLYGON 체인의 USDT 입금만 지원합니다.
+            </p>
+            <button
+              onClick={handleCopy}
+              className="flex items-center justify-center w-full bg-blue-100 text-blue-700 py-1.5 rounded-md text-[12px] font-semibold hover:bg-blue-200"
+            >
               <Copy className="w-4 h-4 mr-1" /> 주소 복사하기
             </button>
           </div>
         </section>
 
-        <section className="bg-white rounded-xl shadow">
-          <div className="bg-blue-600 text-white text-sm font-semibold px-4 py-2 rounded-t-xl">나의 코인 자산</div>
-          <div className="p-4 space-y-2">
-            <div className="flex justify-between items-center">
-              <div className="flex items-center space-x-2">
-                <img src="/tether-icon.png" alt="USDT" className="w-6 h-6" />
-                <span className="font-semibold text-gray-800">Tether</span>
-              </div>
-              <span className="text-gray-800 font-semibold">{usdtBalance}</span>
-            </div>
-            <button onClick={() => router.push("/withdraw")} className="w-full bg-blue-100 text-blue-700 py-2 rounded-full text-sm font-semibold hover:bg-blue-200">
-              출금하기
-            </button>
-          </div>
-        </section>
+        {/* 코인 자산 */}
+     <section className="bg-white rounded-xl shadow">
+  <div className="bg-blue-600 text-white text-md font-semibold px-4 py-1 rounded-t-xl">나의 코인 자산</div>
+  <div className="p-3 space-y-2">
+    <div className="flex justify-between items-center">
+      <div className="flex items-center space-x-2">
+        <img src="/tether-icon.png" alt="USDT" className="w-6 h-6" />
+        <span className="font-semibold text-gray-800">Tether</span>
+      </div>
+      <span className="text-gray-800 font-semibold">{usdtBalance}</span>
+    </div>
+    <button
+      onClick={() => router.push("/withdraw")}
+      className="w-full bg-blue-100 text-blue-700 py-1.5 rounded-md text-[12px] font-semibold hover:bg-blue-200 mb-0"
+    >
+      출금하기
+    </button>
+  </div>
+</section>
 
+        {/* NFT 자산 */}
         <section className="bg-white rounded-xl shadow">
-          <div className="bg-blue-600 text-white text-sm font-semibold px-4 py-2 rounded-t-xl">나의 NFT 자산</div>
-          <div className="px-4 p-2 space-y-1">
+          <div className="bg-blue-600 text-white text-md font-semibold px-4 py-1 rounded-t-xl">나의 NFT 자산</div>
+          <div className="px-3 py-2 space-y-1">
             {[{
               name: "SNOWBOT 300",
               image: "/snow100.png",
@@ -271,7 +276,7 @@ export default function HomePage() {
               type: "nft10000",
             }].map((nft) => (
               <div key={nft.type} className="flex items-center space-x-4">
-                <img src={nft.image} alt={nft.name} className="w-16 h-16 rounded-xl border" />
+                <img src={nft.image} alt={nft.name} className="w-12 h-12 rounded-xl border" />
                 <div>
                   <p className="font-semibold text-gray-800">{nft.name}</p>
                   <p className="text-sm text-gray-500">
@@ -280,7 +285,6 @@ export default function HomePage() {
                 </div>
               </div>
             ))}
-
           </div>
         </section>
       </div>

@@ -26,7 +26,7 @@ export default function TopBar({ icon, title, showBack = false }: TopBarProps) {
             />
           )}
           {icon && <div>{icon}</div>}
-          <h1 className="text-sm font-semibold text-gray-800">{title}</h1>
+          <h1 className="text-lg font-semibold text-gray-800">{title}</h1>
         </div>
       </div>
     </div>
