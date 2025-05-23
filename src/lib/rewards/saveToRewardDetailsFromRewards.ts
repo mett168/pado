@@ -1,18 +1,19 @@
-// 📁 src/lib/rewards/2-saveToRewardDetailsFromRewards.ts
+// 파일: src/lib/rewards/2-saveToRewardDetailsFromRewards.ts
 import { supabase } from "@/lib/supabaseClient";
+import { DAILY_REWARD_BY_NFT, REFERRAL_PERCENT, CENTER_PERCENT } from "@/lib/rewardRates";
 
 export async function saveToRewardDetailsFromRewards() {
   const today = new Date().toISOString().split("T")[0];
 
   const { data: rewards } = await supabase
     .from("rewards")
-    .select("ref_code, reward_type, amount, reward_date, name")
+    .select("ref_code, reward_type, amount, reward_date, name, wallet_address")
     .eq("reward_date", today);
 
   if (!rewards) return;
 
   for (const reward of rewards) {
-    const { ref_code, reward_type, amount, reward_date, name } = reward;
+    const { ref_code, reward_type, amount, reward_date, name, wallet_address } = reward;
 
     // 1. 투자 리워드 처리
     if (reward_type === "invest") {
@@ -33,6 +34,7 @@ export async function saveToRewardDetailsFromRewards() {
         nft300_qty: nft300,
         nft3000_qty: nft3000,
         nft10000_qty: nft10000,
+        wallet_address: wallet_address?.toLowerCase() || "",
         name
       }, { onConflict: "ref_code,reward_date" });
     }
@@ -45,6 +47,8 @@ export async function saveToRewardDetailsFromRewards() {
         .eq("ref_by", ref_code);
 
       for (const invitee of invitees || []) {
+        if (!invitee?.ref_code) continue;
+
         const { data: nftRow } = await supabase
           .from("nfts")
           .select("nft300, nft3000, nft10000")
@@ -55,14 +59,21 @@ export async function saveToRewardDetailsFromRewards() {
         const nft3000 = Number(nftRow?.nft3000) || 0;
         const nft10000 = Number(nftRow?.nft10000) || 0;
 
+        const rewardAmount = +(
+          (nft300 * DAILY_REWARD_BY_NFT.nft300 +
+           nft3000 * DAILY_REWARD_BY_NFT.nft3000 +
+           nft10000 * DAILY_REWARD_BY_NFT.nft10000) * REFERRAL_PERCENT
+        ).toFixed(3);
+
         await supabase.from("reward_referrals").upsert({
           ref_code,
           invitee_code: invitee.ref_code,
           reward_date,
-          reward_amount: null, // 분리 계산 안함
+          reward_amount: rewardAmount,
           nft300_qty: nft300,
           nft3000_qty: nft3000,
           nft10000_qty: nft10000,
+          wallet_address: wallet_address?.toLowerCase() || "",
           name
         }, { onConflict: "ref_code,invitee_code,reward_date" });
       }
@@ -76,6 +87,8 @@ export async function saveToRewardDetailsFromRewards() {
         .eq("center_id", ref_code);
 
       for (const member of members || []) {
+        if (!member?.ref_code) continue;
+
         const { data: nftRow } = await supabase
           .from("nfts")
           .select("nft300, nft3000, nft10000")
@@ -86,14 +99,21 @@ export async function saveToRewardDetailsFromRewards() {
         const nft3000 = Number(nftRow?.nft3000) || 0;
         const nft10000 = Number(nftRow?.nft10000) || 0;
 
+        const rewardAmount = +(
+          (nft300 * DAILY_REWARD_BY_NFT.nft300 +
+           nft3000 * DAILY_REWARD_BY_NFT.nft3000 +
+           nft10000 * DAILY_REWARD_BY_NFT.nft10000) * CENTER_PERCENT
+        ).toFixed(3);
+
         await supabase.from("reward_centers").upsert({
           ref_code,
           member_code: member.ref_code,
           reward_date,
-          reward_amount: null, // 분리 계산 안함
+          reward_amount: rewardAmount,
           nft300_qty: nft300,
           nft3000_qty: nft3000,
           nft10000_qty: nft10000,
+          wallet_address: wallet_address?.toLowerCase() || "",
           name
         }, { onConflict: "ref_code,member_code,reward_date" });
       }

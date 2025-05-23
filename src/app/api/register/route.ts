@@ -6,6 +6,7 @@ const supabase = createClient(
   process.env.SUPABASE_SERVICE_ROLE_KEY!
 );
 
+// 추천코드 생성 함수 (SW10100부터 증가)
 async function generateNextReferralCode(): Promise<string> {
   const { data, error } = await supabase
     .from("users")
@@ -33,7 +34,8 @@ export async function POST(req: NextRequest) {
     wallet_address,
     email = "",  
     phone = "01000000000",
-    ref_by = "SW10100", // 추천코드
+    ref_by = "SW10100",
+    name = "", // ✅ name 파라미터 받음
   } = body;
 
   if (!wallet_address) {
@@ -64,7 +66,7 @@ export async function POST(req: NextRequest) {
   }
 
   // 🧠 추천인 정보 확인 → 센터 ID 계산
-  let center_id = "SW10100"; // 기본값
+  let center_id = "SW10100"; // 기본 센터
   const { data: referrer, error: referrerError } = await supabase
     .from("users")
     .select("role, center_id, ref_code")
@@ -84,9 +86,11 @@ export async function POST(req: NextRequest) {
     }
   }
 
-  // 🆕 신규 유저 등록
+  // 신규 추천코드/닉네임 생성
   const newRefCode = await generateNextReferralCode();
+  const finalName = name.trim() !== "" ? name : newRefCode; // ✅ name이 없으면 nickname(ref_code) 사용
 
+  // 🆕 신규 유저 등록
   const { data: inserted, error: insertError } = await supabase
     .from("users")
     .insert({
@@ -94,9 +98,10 @@ export async function POST(req: NextRequest) {
       email,
       phone,
       nickname: newRefCode,
+      name: finalName, // ✅ 자동 보완
       ref_code: newRefCode,
       ref_by,
-      center_id, // ✅ 로직 반영됨
+      center_id,
       role: "user",
     })
     .select("id, ref_code, nickname")

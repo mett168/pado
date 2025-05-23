@@ -4,12 +4,19 @@ import { supabase } from "@/lib/supabaseClient";
 export async function saveToRewardTransfers() {
   const today = new Date().toISOString().split("T")[0];
 
-  const { data: rewards } = await supabase
+  const { data: rewards, error } = await supabase
     .from("rewards")
     .select("ref_code, wallet_address, reward_type, amount, reward_date, name")
     .eq("reward_date", today);
 
-  if (!rewards) return;
+  if (error) {
+    console.error("❌ 리워드 조회 실패:", error);
+    return;
+  }
+  if (!rewards || rewards.length === 0) {
+    console.log("ℹ️ 오늘 날짜의 리워드가 없습니다.");
+    return;
+  }
 
   const userMap = new Map<
     string,
@@ -30,7 +37,6 @@ export async function saveToRewardTransfers() {
 
   for (const reward of rewards) {
     const { ref_code, wallet_address, reward_type, amount, reward_date, name } = reward;
-
     if (!ref_code) continue;
 
     if (!userMap.has(ref_code)) {
@@ -42,7 +48,7 @@ export async function saveToRewardTransfers() {
         referral_amount: 0,
         center_amount: 0,
         total_amount: 0,
-        name,
+        name: name || "", // name 누락 방지
         status: "pending",
         tx_hash: null,
         error_message: null,
@@ -50,13 +56,14 @@ export async function saveToRewardTransfers() {
     }
 
     const record = userMap.get(ref_code)!;
+    const rewardValue = Number(amount || 0);
 
     if (reward_type === "invest") {
-      record.reward_amount += Number(amount || 0);
+      record.reward_amount += rewardValue;
     } else if (reward_type === "referral") {
-      record.referral_amount += Number(amount || 0);
+      record.referral_amount += rewardValue;
     } else if (reward_type === "center") {
-      record.center_amount += Number(amount || 0);
+      record.center_amount += rewardValue;
     }
 
     record.total_amount =
@@ -64,9 +71,14 @@ export async function saveToRewardTransfers() {
   }
 
   for (const entry of userMap.values()) {
-    await supabase.from("reward_transfers").upsert(
+    const { error } = await supabase.from("reward_transfers").upsert(
       { ...entry },
-      { onConflict: "ref_code,reward_date" } // ✅ 문자열 형식으로 수정
+      { onConflict: "ref_code,reward_date" }
     );
+    if (error) {
+      console.error("❌ reward_transfers 저장 실패:", error, entry);
+    }
   }
+
+  console.log("✅ reward_transfers 저장 완료");
 }
