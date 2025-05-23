@@ -1,4 +1,3 @@
-// 파일: src/lib/rewards/2-saveToRewardDetailsFromRewards.ts
 import { supabase } from "@/lib/supabaseClient";
 import { DAILY_REWARD_BY_NFT, REFERRAL_PERCENT, CENTER_PERCENT } from "@/lib/rewardRates";
 
@@ -13,7 +12,17 @@ export async function saveToRewardDetailsFromRewards() {
   if (!rewards) return;
 
   for (const reward of rewards) {
-    const { ref_code, reward_type, amount, reward_date, name, wallet_address } = reward;
+    const {
+      ref_code,
+      reward_type,
+      amount,
+      reward_date,
+      name,
+      wallet_address
+    } = reward;
+
+    const finalName = name || "이름없음";
+    const finalWallet = wallet_address?.toLowerCase() || "";
 
     // 1. 투자 리워드 처리
     if (reward_type === "invest") {
@@ -34,8 +43,9 @@ export async function saveToRewardDetailsFromRewards() {
         nft300_qty: nft300,
         nft3000_qty: nft3000,
         nft10000_qty: nft10000,
-        wallet_address: wallet_address?.toLowerCase() || "",
-        name
+        wallet_address: finalWallet,
+        name: finalName,
+        memo: "NFT 투자 리워드"
       }, { onConflict: "ref_code,reward_date" });
     }
 
@@ -61,8 +71,8 @@ export async function saveToRewardDetailsFromRewards() {
 
         const rewardAmount = +(
           (nft300 * DAILY_REWARD_BY_NFT.nft300 +
-           nft3000 * DAILY_REWARD_BY_NFT.nft3000 +
-           nft10000 * DAILY_REWARD_BY_NFT.nft10000) * REFERRAL_PERCENT
+            nft3000 * DAILY_REWARD_BY_NFT.nft3000 +
+            nft10000 * DAILY_REWARD_BY_NFT.nft10000) * REFERRAL_PERCENT
         ).toFixed(3);
 
         await supabase.from("reward_referrals").upsert({
@@ -73,8 +83,9 @@ export async function saveToRewardDetailsFromRewards() {
           nft300_qty: nft300,
           nft3000_qty: nft3000,
           nft10000_qty: nft10000,
-          wallet_address: wallet_address?.toLowerCase() || "",
-          name
+          wallet_address: finalWallet,
+          name: finalName,
+          memo: "추천 리워드"
         }, { onConflict: "ref_code,invitee_code,reward_date" });
       }
     }
@@ -101,8 +112,8 @@ export async function saveToRewardDetailsFromRewards() {
 
         const rewardAmount = +(
           (nft300 * DAILY_REWARD_BY_NFT.nft300 +
-           nft3000 * DAILY_REWARD_BY_NFT.nft3000 +
-           nft10000 * DAILY_REWARD_BY_NFT.nft10000) * CENTER_PERCENT
+            nft3000 * DAILY_REWARD_BY_NFT.nft3000 +
+            nft10000 * DAILY_REWARD_BY_NFT.nft10000) * CENTER_PERCENT
         ).toFixed(3);
 
         await supabase.from("reward_centers").upsert({
@@ -113,8 +124,9 @@ export async function saveToRewardDetailsFromRewards() {
           nft300_qty: nft300,
           nft3000_qty: nft3000,
           nft10000_qty: nft10000,
-          wallet_address: wallet_address?.toLowerCase() || "",
-          name
+          wallet_address: finalWallet,
+          name: finalName,
+          memo: "센터 리워드"
         }, { onConflict: "ref_code,member_code,reward_date" });
       }
     }
