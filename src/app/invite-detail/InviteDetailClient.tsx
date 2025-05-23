@@ -15,22 +15,22 @@ export default function InviteDetailClient() {
     nft10000: 0,
   });
   const [history, setHistory] = useState<{ date: string; amount: number }[]>([]);
-  const [nickname, setNickname] = useState("");
+  const [name, setName] = useState(""); // ✅ 닉네임 → name 으로 변경
 
   useEffect(() => {
     const fetchData = async () => {
       if (!refCode) return;
 
-      // ✅ 유저 이름 조회
+      // ✅ 유저 name 조회
       const { data: user } = await supabase
         .from("users")
         .select("name")
         .eq("ref_code", refCode)
         .maybeSingle();
 
-      if (user?.name) setNickname(user.name);
+      if (user?.name) setName(user.name);
 
-      // ✅ NFT 보유 수량 집계 (컬럼 구조 기반)
+      // ✅ NFT 보유 수량 집계
       const { data: nfts } = await supabase
         .from("nfts")
         .select("nft300, nft3000, nft10000")
@@ -46,7 +46,7 @@ export default function InviteDetailClient() {
 
       setSummary(count);
 
-      // ✅ 리워드 내역 (reward_transfers 기준)
+      // ✅ 리워드 내역
       const { data: historyData, error: historyError } = await supabase
         .from("reward_transfers")
         .select("created_at, total_amount")
@@ -95,26 +95,41 @@ export default function InviteDetailClient() {
           <img src="/icon-back.png" alt="뒤로가기" className="w-5 h-5" />
         </button>
         <h1 className="text-base font-semibold text-gray-800">
-          {nickname || "상세정보"}
+          {name || "상세정보"}
         </h1>
       </div>
 
       {/* NFT 자산 */}
       <div className="max-w-md mx-auto px-4 pt-2">
-        <h2 className="font-semibold text-sm text-gray-700 mb-2">NFT 자산현황</h2>
-        <div className="bg-white rounded-xl shadow p-4 flex justify-between">
-          {nftAssets.map((nft, idx) => (
-            <div key={idx} className="text-center">
-              <img src={nft.image} className="w-20 h-20 rounded" alt={nft.label} />
-              <p className="text-xs font-bold mt-2">{nft.label}</p>
-              <p className="text-xs text-gray-500">보유수량: {nft.qty}개</p>
-            </div>
-          ))}
-        </div>
+{/* NFT 자산현황 제목 */}
+<h2 className="font-semibold text-sm text-gray-700 mb-2 pl-2">
+  {name ? `${name} 님의 NFT 자산현황` : "NFT 자산현황"}
+</h2>
+
+{/* NFT 카드 박스 */}
+<div className="bg-white rounded-xl shadow p-4 flex flex-col space-y-3">
+  {nftAssets.map((nft, idx) => (
+    <div key={idx} className="flex items-center">
+      <img
+        src={nft.image}
+        alt={nft.label}
+        className="w-14 h-14 rounded mr-4"
+      />
+      <div>
+        <p className="text-sm font-semibold text-gray-800">{nft.label}</p>
+        <p className="text-xs text-gray-500">
+          보유 수량: <span className="text-blue-600 font-medium">{nft.qty}개</span>
+        </p>
+      </div>
+    </div>
+  ))}
+</div>
+
+
 
         {/* 리워드 내역 */}
-        <h2 className="font-semibold text-sm text-gray-700 mt-6 mb-2">
-          친구초대 데일리 리워드 내역
+<h2 className="font-semibold text-sm text-gray-700 mt-6 mb-2 pl-2">
+  {name ? `${name} 님 데일리 리워드 내역` : "데일리 리워드 내역"}
         </h2>
         <div className="bg-white rounded-xl shadow p-4">
           <div className="grid grid-cols-2 text-sm font-semibold text-gray-700 border-b pb-2">

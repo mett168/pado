@@ -7,7 +7,6 @@ import { supabase } from "@/lib/supabaseClient";
 
 const USDT_ADDRESS = "0xc2132D05D31c914a87C6611C10748AEb04B58e8F";
 
-// ✅ 반드시 stateMutability 포함
 const USDT_ABI = [
   {
     name: "transfer",
@@ -24,8 +23,7 @@ const USDT_ABI = [
 ] as const;
 
 function getTodayDate() {
-  const now = new Date();
-  return now.toISOString().split("T")[0];
+  return new Date().toISOString().split("T")[0];
 }
 
 export async function sendUSDT(to: string, amount: number) {
@@ -34,7 +32,7 @@ export async function sendUSDT(to: string, amount: number) {
   console.log("📌 송금 금액:", amount);
 
   if (!to || amount <= 0) {
-    console.error("❌ [입력 오류] 잘못된 주소 또는 금액:", to, amount);
+    console.error("❌ 잘못된 주소 또는 금액:", to, amount);
     throw new Error("잘못된 주소 또는 금액");
   }
 
@@ -45,7 +43,7 @@ export async function sendUSDT(to: string, amount: number) {
     });
 
     const adminAddress = adminWallet.address;
-    console.log("✅ [지갑 연결 성공] 관리자 주소:", adminAddress);
+    console.log("✅ 관리자 지갑 주소:", adminAddress);
 
     const balance = await balanceOf({
       contract: {
@@ -56,10 +54,10 @@ export async function sendUSDT(to: string, amount: number) {
       address: adminAddress,
     });
 
-    console.log("💰 [잔고 확인] USDT 잔액:", Number(balance) / 1e6, "USDT");
+    console.log("💰 관리자 지갑 USDT 잔액:", Number(balance) / 1e6, "USDT");
 
-    const parsedAmount = BigInt(Math.floor(amount * 1_000_000));
-    console.log("🔢 [전송 금액]", parsedAmount.toString());
+    const parsedAmount = BigInt(Math.round(amount * 1_000_000));
+    console.log("🔢 전송할 금액 (정수):", parsedAmount.toString());
 
     const contract = getContract({
       address: USDT_ADDRESS,
@@ -84,7 +82,7 @@ export async function sendUSDT(to: string, amount: number) {
       throw new Error("트랜잭션 해시 없음 → 전송 실패");
     }
 
-    console.log("🎉 [전송 성공] 트랜잭션 해시:", txHash);
+    console.log("🎉 USDT 전송 성공! 트랜잭션 해시:", txHash);
 
     const today = getTodayDate();
 
@@ -95,46 +93,51 @@ export async function sendUSDT(to: string, amount: number) {
       .maybeSingle();
 
     if (userError) {
-      console.warn("⚠️ [유저 조회 오류]:", userError.message);
+      console.warn("⚠️ 유저 조회 오류:", userError.message);
     }
 
     const refCode = user?.ref_code || "unknown";
 
-    // ✅ usdt_history 기록
+    // ✅ USDT 출금 내역 기록
     const { error: insertError } = await supabase.from("usdt_history").insert({
       ref_code: refCode,
       direction: "out",
-      amount: amount,
+      amount,
       tx_hash: txHash,
       status: "completed",
       reward_date: today,
+      // memo: "리워드 자동 지급", // 필요 시 사용
     });
 
     if (insertError) {
-      console.warn("⚠️ [기록 저장 오류]:", insertError.message);
+      console.warn("⚠️ usdt_history 저장 오류:", insertError.message);
     }
 
     // ✅ reward_transfers 상태 업데이트
-    const { error: updateError } = await supabase
-      .from("reward_transfers")
-      .update({
-        status: "success",
-        executed_at: new Date().toISOString(),
-        tx_hash: txHash,
-      })
-      .eq("ref_code", refCode)
-      .eq("reward_date", today);
+    if (refCode !== "unknown") {
+      const { error: updateError } = await supabase
+        .from("reward_transfers")
+        .update({
+          status: "success",
+          executed_at: new Date().toISOString(),
+          tx_hash: txHash,
+        })
+        .eq("ref_code", refCode)
+        .eq("reward_date", today);
 
-    if (updateError) {
-      console.warn("⚠️ [reward_transfers 업데이트 오류]:", updateError.message);
+      if (updateError) {
+        console.warn("⚠️ reward_transfers 업데이트 오류:", updateError.message);
+      } else {
+        console.log("✅ reward_transfers 상태 업데이트 완료");
+      }
+    } else {
+      console.warn("⚠️ ref_code를 찾을 수 없어 reward_transfers 업데이트 생략됨");
     }
-
-    console.log("📝 [기록 완료] usdt_history + reward_transfers 업데이트 완료");
 
     return { transactionHash: txHash };
   } catch (error: any) {
     const errMsg = error?.message || "알 수 없는 오류";
-    console.error("❌ [예외 발생] sendUSDT 오류:", errMsg);
-    throw new Error("송금 중 오류 발생: " + errMsg);
+    console.error("❌ [송금 실패]", errMsg);
+    throw new Error("USDT 전송 중 오류 발생: " + errMsg);
   }
 }

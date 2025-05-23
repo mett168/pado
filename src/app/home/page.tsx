@@ -252,7 +252,7 @@ export default function HomePage() {
     </div>
     <button
       onClick={() => router.push("/withdraw")}
-      className="w-full bg-blue-100 text-blue-700 py-1.5 rounded-md text-sm font-semibold hover:bg-blue-200 mb-0"
+      className="w-full bg-blue-100 text-blue-700 py-1.5 rounded-md text-sm font-semibold hover:bg-blue-200"
     >
       출금하기
     </button>
