@@ -124,16 +124,22 @@ useEffect(() => {
           )}
         </div>
 
-        <footer className="text-xs text-[#4d4e4f] w-full mt-10">
-          <div className="rounded-lg p-2 space-y-1 text-center">
-            <p>
-              계속하면 <Link href="/terms" className="text-[#1369b9] font-medium">이용약관</Link>에 동의하는 것입니다.
-            </p>
-            <p>
-              <Link href="/privacy" className="text-[#1369b9] font-medium">개인정보 처리방침</Link>을 확인하세요.
-            </p>
-          </div>
-        </footer>
+  <footer className="text-xs text-[#4d4e4f] w-full mt-10">
+  <div className="rounded-lg p-2 text-center space-y-1">
+    <p>
+      계속하면 이용약관에 동의하는 것입니다.{" "}
+      <Link href="/terms" className="text-[#1369b9] font-medium underline">
+        이용약관
+      </Link>
+    </p>
+    <p>
+      개인정보 처리방침을 확인하세요.{" "}
+      <Link href="/privacy" className="text-[#1369b9] font-medium underline">
+        개인정보 처리방침
+      </Link>
+    </p>
+  </div>
+</footer>
       </main>
     </>
   );

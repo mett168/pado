@@ -88,7 +88,7 @@ export async function POST(req: NextRequest) {
 
   // 신규 추천코드/닉네임 생성
   const newRefCode = await generateNextReferralCode();
-  const finalName = name.trim() !== "" ? name : newRefCode; // ✅ name이 없으면 nickname(ref_code) 사용
+  const finalName = name.trim; // ✅ name이 없으면 nickname(ref_code) 사용
 
   // 🆕 신규 유저 등록
   const { data: inserted, error: insertError } = await supabase

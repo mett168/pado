@@ -2,12 +2,13 @@
   "crons": [
     {
       "path": "/api/snapshot",
-      "schedule": "0 0,4,8,12,16,20 * * *"
+      "schedule": "30 5 * * *"  
     },
     {
       "path": "/api/send-rewards",
-      "schedule": "0 2,6,10,14,18,22 * * *"
+      "schedule": "0 6 * * *"   
     }
   ]
 }
+
 
