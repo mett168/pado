@@ -76,11 +76,11 @@ const handleLogout = async () => {
   return (
     <>
       <TopBar title="마이페이지" showBack />
-      <main className="min-h-screen bg-[#f5f7fa] pb-24 w-full">
-        <div className="px-4 pt-4 max-w-[500px] mx-auto">
+      <main className="min-h-screen bg-[#f5f7fa] pb-16 w-full">
+        <div className="px-4 pt-2 max-w-[500px] mx-auto">
           {/* 계정관리 */}
-          <section className="mb-4">
-            <h2 className="text-md font-semibold text-gray-700 mb-2 pl-2">계정관리</h2>
+          <section className="mb-2">
+            <h2 className="text-md font-semibold text-gray-700 mb-1 pl-2">계정관리</h2>
             <div className="bg-white rounded-xl shadow border text-sm divide-y divide-gray-200">
               {/* 이름 */}
               <div className="flex justify-between px-4 py-3 items-center">
@@ -195,8 +195,8 @@ const handleLogout = async () => {
           </section>
 
           {/* 내역관리 */}
-          <section className="mb-6">
-            <h2 className="text-md font-semibold text-gray-700 mb-2 pl-2">내역관리</h2>
+          <section className="mb-2">
+            <h2 className="text-md font-semibold text-gray-700 mb-1 pl-2">내역관리</h2>
             <div className="bg-white rounded-xl shadow border text-sm divide-y divide-gray-200">
               {[
                 { label: "NFT 구매 내역", path: "/mypage/history/nft-purchase" },
@@ -216,16 +216,21 @@ const handleLogout = async () => {
             </div>
           </section>
 
-          {/* 1:1 문의 */}
-          <section className="space-y-4 mb-6">
-            <div className="bg-white p-4 rounded-xl shadow flex justify-between items-center">
-              <div className="flex items-center space-x-2">
-                <img src="/icon-question.png" alt="문의" className="w-5 h-5" />
-                <span className="text-sm">1:1 문의하기</span>
-              </div>
-              <img src="/icon-link.png" alt="이동" className="w-4 h-4" />
-            </div>
-          </section>
+<section className="space-y-4 mb-2">
+  <a
+    href="http://pf.kakao.com/_rxaxmGn/chat"
+    target="_blank"
+    rel="noopener noreferrer"
+    className="block bg-white p-4 rounded-xl shadow flex justify-between items-center hover:bg-gray-50"
+  >
+    <div className="flex items-center space-x-2">
+      <img src="/icon-question.png" alt="문의" className="w-5 h-5" />
+      <span className="text-sm">1:1 문의하기</span>
+    </div>
+    <img src="/icon-link.png" alt="이동" className="w-4 h-4" />
+  </a>
+</section>
+
 
           {/* 로그아웃 버튼 */}
           <button
