@@ -60,31 +60,42 @@ export async function saveToRewardTransfers() {
     });
   }
 
+  // 투자 리워드 누적
   for (const item of invests || []) {
     const user = userMap.get(item.ref_code);
-    if (user) user.reward_amount += Number(item.reward_amount || 0);
+    if (user) {
+      user.reward_amount += +Number(item.reward_amount || 0).toFixed(3);
+    }
   }
 
+  // 추천 리워드 누적
   for (const item of referrals || []) {
     const user = userMap.get(item.ref_code);
-    if (user) user.referral_amount += Number(item.reward_amount || 0);
+    if (user) {
+      user.referral_amount += +Number(item.reward_amount || 0).toFixed(3);
+    }
   }
 
+  // 센터 리워드 누적
   for (const item of centers || []) {
     const user = userMap.get(item.ref_code);
-    if (user) user.center_amount += Number(item.reward_amount || 0);
+    if (user) {
+      user.center_amount += +Number(item.reward_amount || 0).toFixed(3);
+    }
   }
 
+  // reward_transfers 저장 (upsert)
   for (const entry of userMap.values()) {
-    entry.total_amount =
-      entry.reward_amount + entry.referral_amount + entry.center_amount;
+    entry.total_amount = +(
+      entry.reward_amount + entry.referral_amount + entry.center_amount
+    ).toFixed(3);
 
     const { error } = await supabase
       .from("reward_transfers")
       .upsert(entry, { onConflict: "ref_code,reward_date" });
 
     if (error) {
-      console.error("❌ reward_transfers 저장 실패:", error, entry);
+      console.error("❌ reward_transfers 저장 실패:", error.message, entry);
     }
   }
 
