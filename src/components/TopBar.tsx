@@ -7,14 +7,14 @@ interface TopBarProps {
   icon?: ReactNode;
   title: string;
   showBack?: boolean;
+  onBack?: () => void; // ✅ 추가
 }
 
-export default function TopBar({ icon, title, showBack = false }: TopBarProps) {
+export default function TopBar({ icon, title, showBack = false, onBack }: TopBarProps) {
   const router = useRouter();
 
   return (
     <div className="sticky top-0 z-50 w-full bg-white border-b border-gray-200">
-      {/* ✅ 전체 폭은 유지하되, 내부 내용만 max-w-[500px]으로 제한 */}
       <div className="w-full flex justify-center">
         <div className="w-full max-w-[500px] px-4 py-1 flex items-center space-x-2">
           {showBack && (
@@ -22,7 +22,7 @@ export default function TopBar({ icon, title, showBack = false }: TopBarProps) {
               src="/icon-back.png"
               alt="뒤로가기"
               className="w-5 h-5 cursor-pointer"
-              onClick={() => router.push("/home")}
+              onClick={onBack || (() => router.back())} // ✅ 동적 처리
             />
           )}
           {icon && <div>{icon}</div>}
@@ -32,3 +32,4 @@ export default function TopBar({ icon, title, showBack = false }: TopBarProps) {
     </div>
   );
 }
+

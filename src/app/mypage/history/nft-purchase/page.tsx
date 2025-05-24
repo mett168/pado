@@ -1,11 +1,13 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation"; // ✅ 추가
 import { useActiveAccount } from "thirdweb/react";
 import TopBar from "@/components/TopBar";
 import { supabase } from "@/lib/supabaseClient";
 
 export default function NftInHistoryPage() {
+  const router = useRouter(); // ✅ 추가
   const account = useActiveAccount();
   const [records, setRecords] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -43,7 +45,7 @@ export default function NftInHistoryPage() {
 
   return (
     <>
-      <TopBar title="NFT 입금 내역" showBack />
+      <TopBar title="NFT 구매 내역" showBack onBack={() => router.push("/mypage")} />
       <main className="p-4 max-w-md mx-auto bg-[#f5f7fa] min-h-screen pb-24">
         {loading ? (
           <p className="text-sm text-gray-500 text-center">불러오는 중...</p>

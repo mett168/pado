@@ -26,6 +26,19 @@ export default function HomePage() {
   const router = useRouter();
   const balanceCalled = useRef(false);
 
+  
+  // ✅ 여기에 추가
+  useEffect(() => {
+    const invalid =
+      !account?.address ||
+      account.address === "0x0000000000000000000000000000000000000000";
+
+    if (invalid) {
+      console.warn("⚠️ 유효하지 않은 지갑 주소. 로그인 페이지로 이동합니다.");
+      router.replace("/");
+    }
+  }, [account?.address]);
+
   const [usdtBalance, setUsdtBalance] = useState("조회 중...");
   const [nickname, setNickname] = useState("");
   const [name, setName] = useState("");

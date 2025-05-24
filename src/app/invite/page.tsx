@@ -90,7 +90,7 @@ export default function InvitePage() {
         <div className="px-2 pt-4 max-w-md mx-auto space-y-4">
           {/* ✅ 나의 초대 코드 */}
 <section className="bg-white rounded-xl shadow overflow-hidden">
-  <div className="bg-blue-600 text-white px-2 py-1 font-semibold text-base">
+  <div className="bg-blue-600 text-white px-3 py-1 font-semibold text-base">
     나의 초대 코드
   </div>
   <div className="px-3 py-4 space-y-1 text-xs text-black">
