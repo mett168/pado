@@ -9,6 +9,7 @@ const inter = Inter({ subsets: ['latin'] });
 export const metadata = {
   title: 'SNW03',
   description: '스마트 월렛 프로젝트',
+  manifest: '/manifest.json',
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
