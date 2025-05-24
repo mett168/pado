@@ -10,9 +10,11 @@ export async function calculateFullRewards() {
 
   if (!users) return;
 
+  const userMap = new Map(users.map(u => [u.ref_code, u.name || ""]));
+
   // 1. 투자 리워드 저장
   for (const user of users) {
-    const { ref_code, name, wallet_address, ref_by, center_id } = user;
+    const { ref_code, name, ref_by, center_id } = user;
     if (!ref_code) continue;
 
     const { data: nftRow } = await supabase
@@ -31,11 +33,16 @@ export async function calculateFullRewards() {
       nft10000 * DAILY_REWARD_BY_NFT.nft10000
     ).toFixed(3);
 
+    const refByName = ref_by ? userMap.get(ref_by) || "이름없음" : null;
+    const centerName = center_id ? userMap.get(center_id) || "이름없음" : null;
+
     await supabase.from("reward_invests").insert({
       ref_code,
       name,
       ref_by,
+      ref_by_name: refByName,
       center_id,
+      center_name: centerName,
       nft300_qty: nft300,
       nft3000_qty: nft3000,
       nft10000_qty: nft10000,
@@ -44,7 +51,6 @@ export async function calculateFullRewards() {
       memo: investReward > 0 ? "NFT 투자 리워드" : "보유 NFT 없음"
     });
   }
-
   // 2. 추천 리워드 저장
   for (const referrer of users) {
     const { ref_code, name: refName } = referrer;
