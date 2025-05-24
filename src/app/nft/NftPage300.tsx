@@ -48,7 +48,7 @@ export default function NftPage300() {
   }, [fetchNFTBalance]);
 
   return (
-    <main className="min-h-screen bg-[#f4f6f9] pb-24 px-0 pt-4 max-w-[500px] mx-auto relative">
+    <main className="min-h-screen bg-[#f4f6f9] pb-24 px-0 pt-2 max-w-[500px] mx-auto relative">
       <section className="space-y-4">
         {/* ✅ NFT 카드 박스 */}
         <div className="bg-[#DDF0F5] rounded-2xl shadow-md p-5">
@@ -56,7 +56,7 @@ export default function NftPage300() {
             <img
               src="/snow100.png"
               alt="SNOWBOT 300"
-              className="w-20 h-20 rounded-xl border"
+              className="w-16 h-16 rounded-xl border"
             />
             <div className="flex-1 text-sm font-semibold text-gray-800 space-y-1">
               <p className="text-gray-800 font-semibold">SNOWBOT 300</p>

@@ -48,7 +48,7 @@ export default function NftPage3000() {
   }, [fetchNFTBalance]);
 
   return (
-    <main className="min-h-screen bg-[#f4f6f9] pb-24 px-0 pt-4 max-w-[500px] mx-auto relative">
+    <main className="min-h-screen bg-[#f4f6f9] pb-24 px-0 pt-2 max-w-[500px] mx-auto relative">
       <section className="space-y-4">
         {/* 카드 박스 */}
         <div className="bg-[#DDF0F5] origin-top-left rounded-2xl shadow-md p-5">
@@ -56,7 +56,7 @@ export default function NftPage3000() {
     <img
       src="/snowbot3000.png"
       alt="SNOWBOT 3000"
-      className="w-20 h-20 rounded-xl border"
+      className="w-16 h-16 rounded-xl border"
     />
     <div className="flex-1 text-sm font-semibold text-gray-800 space-y-1">
       {/* 이름 */}

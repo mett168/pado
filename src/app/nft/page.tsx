@@ -18,7 +18,7 @@ export default function NftMainPage() {
       <main className="min-h-screen bg-[#f4f6f9] pb-20 w-full">
         <div className="px-3 pt-4 space-y-2 max-w-[500px] mx-auto">
           {/* 탭 버튼 */}
-          <div className="flex gap-x-2 mb-4 mt-4">
+          <div className="flex gap-x-2 mb-1 mt-1">
             <button
               className={`px-4 py-2 rounded-lg text-sm ${
                 selected === "3000" ? "bg-blue-500 text-white" : "bg-gray-200"
