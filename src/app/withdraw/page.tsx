@@ -107,7 +107,7 @@ export default function WithdrawPage() {
         direction: "out",
         purpose: "user",
         amount: amountNumber,
-        tx_hash: result.transactionHash,
+        tx_hash: result.transactionHash + "-recv", // ✅ 중복 방지용 suffix
         status: "completed",
       });
 
