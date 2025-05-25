@@ -1,7 +1,8 @@
 import { supabase } from "@/lib/supabaseClient";
 import { NextResponse } from "next/server";
 import { sendUSDT } from "@/lib/sendUSDT";
-import { getTodayDate } from "@/lib/dateUtil";
+// ✅ 한국시간 유틸 함수 추가
+import { getKSTDateString, getKSTISOString } from "@/lib/dateUtil";
 
 // ✅ GET 요청도 POST 로직으로 처리
 export async function GET() {
@@ -9,8 +10,8 @@ export async function GET() {
 }
 
 export async function POST() {
-  const today = getTodayDate();
-  console.log("✅ [CRON] /api/send-rewards 실행됨:", new Date().toISOString());
+  const today = getKSTDateString(); // ✅ 한국 날짜 기준
+  console.log("✅ [CRON] /api/send-rewards 실행됨:", getKSTISOString());
   console.log("📆 오늘 날짜:", today);
 
   const { data: transfers, error } = await supabase
@@ -56,7 +57,7 @@ export async function POST() {
         tx_hash,
         status,
         error_message,
-        executed_at: new Date().toISOString(),
+        executed_at: getKSTISOString(),
       })
       .eq("ref_code", entry.ref_code)
       .eq("reward_date", today);

@@ -1,8 +1,10 @@
 import { supabase } from "@/lib/supabaseClient";
 import { DAILY_REWARD_BY_NFT, REFERRAL_PERCENT, CENTER_PERCENT } from "@/lib/rewardRates";
+import { getKSTDateString } from "@/lib/dateUtil";
+
 
 export async function calculateFullRewards() {
-  const today = new Date().toISOString().split("T")[0];
+  const today = getKSTDateString(); // ✅ 한국 날짜로 변경
 
   const { data: users } = await supabase
     .from("users")

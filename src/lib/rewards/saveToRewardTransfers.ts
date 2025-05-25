@@ -1,7 +1,10 @@
 import { supabase } from "@/lib/supabaseClient";
+import { getKSTDateString } from "@/lib/dateUtil"; // ✅ 한국 날짜 유틸
+
 
 export async function saveToRewardTransfers() {
-  const today = new Date().toISOString().split("T")[0];
+  const today = getKSTDateString(); // ✅ 한국 기준 날짜
+
 
   // 1. 유저 리스트 조회 (지갑 주소 및 이름 확보용)
   const { data: users } = await supabase

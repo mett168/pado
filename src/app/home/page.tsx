@@ -14,6 +14,7 @@ import { getOnchainNFTBalances } from "@/lib/getOnchainNFTBalances";
 import { client } from "@/lib/client";
 import { supabase } from "@/lib/supabaseClient";
 import { useSession } from "@supabase/auth-helpers-react";
+import { getKSTDateString } from "@/lib/dateUtil"; // ✅ 맨 위 import 추가
 
 type NFTType = "nft300" | "nft3000" | "nft10000";
 
@@ -124,7 +125,7 @@ export default function HomePage() {
 
   const fetchTodayRewards = async () => {
     if (!account?.address) return;
-    const today = new Date().toISOString().split("T")[0];
+    const today = getKSTDateString(); // ✅ 한국 날짜 기준
 
     const { data: user } = await supabase
       .from("users")

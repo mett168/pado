@@ -4,6 +4,8 @@ import { getContract, prepareContractCall, sendTransaction } from "thirdweb";
 import { privateKeyToAccount } from "thirdweb/wallets";
 import { balanceOf } from "thirdweb/extensions/erc20";
 import { supabase } from "@/lib/supabaseClient";
+import { getKSTDateString, getKSTISOString } from "@/lib/dateUtil"; // ✅ 추가
+
 
 const USDT_ADDRESS = "0xc2132D05D31c914a87C6611C10748AEb04B58e8F";
 
@@ -22,9 +24,6 @@ const USDT_ABI = [
   }
 ] as const;
 
-function getTodayDate() {
-  return new Date().toISOString().split("T")[0];
-}
 
 export async function sendUSDT(to: string, amount: number) {
   console.log("🚀 [sendUSDT] 호출됨");
@@ -84,7 +83,7 @@ export async function sendUSDT(to: string, amount: number) {
 
     console.log("🎉 USDT 전송 성공! 트랜잭션 해시:", txHash);
 
-    const today = getTodayDate();
+    const today = getKSTDateString(); // ✅ 한국 기준 날짜
 
     const { data: user, error: userError } = await supabase
       .from("users")
@@ -119,7 +118,7 @@ export async function sendUSDT(to: string, amount: number) {
         .from("reward_transfers")
         .update({
           status: "success",
-          executed_at: new Date().toISOString(),
+          executed_at: getKSTISOString(), // ✅ 한국 기준 시간
           tx_hash: txHash,
         })
         .eq("ref_code", refCode)
