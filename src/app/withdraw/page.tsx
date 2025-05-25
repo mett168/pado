@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { useActiveAccount } from "thirdweb/react"; // ✅ 수정
+import { useActiveAccount } from "thirdweb/react";
 import { getContract, prepareContractCall, sendTransaction } from "thirdweb";
 import { polygon } from "thirdweb/chains";
 import { balanceOf } from "thirdweb/extensions/erc20";
@@ -85,7 +85,7 @@ export default function WithdrawPage() {
       console.log("✅ 트랜잭션 성공:", result.transactionHash);
       setStatus(`✅ 출금 성공! TX: ${result.transactionHash}`);
 
-      // ✅ Supabase 기록
+      // ✅ Supabase 기록 (user 출금)
       let refCode = "unknown";
       try {
         const { data: user } = await supabase
@@ -105,6 +105,7 @@ export default function WithdrawPage() {
         wallet_address: walletAddress,
         ref_code: refCode,
         direction: "out",
+        purpose: "user", // ✅ 유저간 송금
         amount: amountNumber,
         tx_hash: result.transactionHash,
         status: "completed",

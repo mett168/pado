@@ -14,7 +14,7 @@ import { getOnchainNFTBalances } from "@/lib/getOnchainNFTBalances";
 import { client } from "@/lib/client";
 import { supabase } from "@/lib/supabaseClient";
 import { useSession } from "@supabase/auth-helpers-react";
-import { getKSTDateString } from "@/lib/dateUtil"; // ✅ 맨 위 import 추가
+import { getKSTDateString } from "@/lib/dateUtil";
 
 type NFTType = "nft300" | "nft3000" | "nft10000";
 
@@ -27,8 +27,6 @@ export default function HomePage() {
   const router = useRouter();
   const balanceCalled = useRef(false);
 
-  
-  // ✅ 여기에 추가
   useEffect(() => {
     const invalid =
       !account?.address ||
@@ -59,53 +57,7 @@ export default function HomePage() {
     try {
       const result = await balanceOf({ contract: usdtContract, address: account.address });
       const formatted = (Number(result) / 1e6).toFixed(2);
-      const current = parseFloat(formatted);
-      const prev = parseFloat(localStorage.getItem("usdt_balance") || "0");
-
-      const alreadyRecorded = localStorage.getItem("last_recorded_balance");
-      if (alreadyRecorded === formatted || current === prev) {
-        setUsdtBalance(`${formatted} USDT`);
-        return;
-      }
-
-      if (current > prev) {
-        const walletAddress = account.address.toLowerCase();
-        localStorage.setItem("usdt_balance", formatted);
-        localStorage.setItem("last_recorded_balance", formatted);
-        let refCode = "unknown";
-        const diff = Number((current - prev).toFixed(2));
-
-        try {
-          const { data: user } = await supabase
-            .from("users")
-            .select("ref_code")
-            .eq("wallet_address", walletAddress)
-            .single();
-          if (user?.ref_code) refCode = user.ref_code;
-        } catch (err) {
-          console.warn("❌ ref_code 조회 실패", err);
-        }
-
-        const { error } = await supabase.from("usdt_history").insert([
-          {
-            wallet_address: walletAddress,
-            ref_code: refCode,
-            direction: "in",
-            amount: diff,
-            tx_hash: "auto-detect",
-            status: "completed",
-          },
-        ]);
-
-        if (!error) {
-          console.log("✅ 자동 입금 기록 완료:", { walletAddress, refCode, diff });
-        } else {
-          console.error("❌ 자동 입금 기록 실패:", error);
-        }
-      } else {
-        localStorage.setItem("usdt_balance", formatted);
-      }
-
+      localStorage.setItem("usdt_balance", formatted);
       setUsdtBalance(`${formatted} USDT`);
     } catch (err) {
       console.error("❌ USDT 잔액 조회 실패:", err);
@@ -125,7 +77,7 @@ export default function HomePage() {
 
   const fetchTodayRewards = async () => {
     if (!account?.address) return;
-    const today = getKSTDateString(); // ✅ 한국 날짜 기준
+    const today = getKSTDateString();
 
     const { data: user } = await supabase
       .from("users")

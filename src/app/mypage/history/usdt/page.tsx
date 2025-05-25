@@ -77,7 +77,14 @@ export default function UsdtHistoryPage() {
             >
               <div className="flex justify-between">
                 <span className="font-semibold">
-                  {item.direction === "in" ? "입금" : "출금"}
+                  {item.direction === "in" ? "입금" : "출금"} {" "}
+                  ({item.purpose === "external"
+                    ? "외부"
+                    : item.purpose === "reward"
+                    ? "리워드"
+                    : item.purpose === "user"
+                    ? "유저간"
+                    : "기타"})
                 </span>
                 <span className="text-sm text-gray-500">
                   {new Date(item.created_at).toLocaleString()}

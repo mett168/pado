@@ -4,8 +4,7 @@ import { getContract, prepareContractCall, sendTransaction } from "thirdweb";
 import { privateKeyToAccount } from "thirdweb/wallets";
 import { balanceOf } from "thirdweb/extensions/erc20";
 import { supabase } from "@/lib/supabaseClient";
-import { getKSTDateString, getKSTISOString } from "@/lib/dateUtil"; // ✅ 추가
-
+import { getKSTDateString, getKSTISOString } from "@/lib/dateUtil";
 
 const USDT_ADDRESS = "0xc2132D05D31c914a87C6611C10748AEb04B58e8F";
 
@@ -23,7 +22,6 @@ const USDT_ABI = [
     ]
   }
 ] as const;
-
 
 export async function sendUSDT(to: string, amount: number) {
   console.log("🚀 [sendUSDT] 호출됨");
@@ -83,7 +81,7 @@ export async function sendUSDT(to: string, amount: number) {
 
     console.log("🎉 USDT 전송 성공! 트랜잭션 해시:", txHash);
 
-    const today = getKSTDateString(); // ✅ 한국 기준 날짜
+    const today = getKSTDateString();
 
     const { data: user, error: userError } = await supabase
       .from("users")
@@ -97,15 +95,16 @@ export async function sendUSDT(to: string, amount: number) {
 
     const refCode = user?.ref_code || "unknown";
 
-    // ✅ USDT 출금 내역 기록
+    // ✅ USDT 출금 내역 기록 (리워드 목적)
     const { error: insertError } = await supabase.from("usdt_history").insert({
       ref_code: refCode,
-      direction: "out",
+      wallet_address: to.toLowerCase(),
+      direction: "in", // ✅ 리워드는 입금 처리
+      purpose: "reward", // ✅ 목적 명시
       amount,
       tx_hash: txHash,
       status: "completed",
       reward_date: today,
-      // memo: "리워드 자동 지급", // 필요 시 사용
     });
 
     if (insertError) {
@@ -118,7 +117,7 @@ export async function sendUSDT(to: string, amount: number) {
         .from("reward_transfers")
         .update({
           status: "success",
-          executed_at: getKSTISOString(), // ✅ 한국 기준 시간
+          executed_at: getKSTISOString(),
           tx_hash: txHash,
         })
         .eq("ref_code", refCode)
