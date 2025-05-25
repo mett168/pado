@@ -119,33 +119,45 @@ export default function WithdrawPage() {
       }
 
       // ✅ Supabase 기록 (user 입금)
-      try {
-        const { data: receiver } = await supabase
-          .from("users")
-          .select("ref_code")
-          .eq("wallet_address", toAddress.toLowerCase())
-          .maybeSingle();
+try {
+  // 먼저 중복 여부 확인
+  const { data: existing } = await supabase
+    .from("usdt_history")
+    .select("id")
+    .eq("tx_hash", result.transactionHash)
+    .maybeSingle();
 
-        const receiverRefCode = receiver?.ref_code || "unknown";
+  if (existing) {
+    console.warn("⚠️ 입금 기록 생략 - 이미 존재하는 트랜잭션 해시:", result.transactionHash);
+  } else {
+    const { data: receiver } = await supabase
+      .from("users")
+      .select("ref_code")
+      .eq("wallet_address", toAddress.toLowerCase())
+      .maybeSingle();
 
-        const inResult = await supabase.from("usdt_history").insert({
-          wallet_address: toAddress.toLowerCase(),
-          ref_code: receiverRefCode,
-          direction: "in",
-          purpose: "user",
-          amount: amountNumber,
-          tx_hash: result.transactionHash,
-          status: "completed",
-        });
+    const receiverRefCode = receiver?.ref_code || "unknown";
 
-        if (inResult.error) {
-          console.warn("❌ 유저간 입금 기록 실패:", inResult.error.message);
-        } else {
-          console.log("✅ 유저간 입금 기록 성공");
-        }
-      } catch (err) {
-        console.error("❌ 수신자 입금 기록 중 오류:", err);
-      }
+    const inResult = await supabase.from("usdt_history").insert({
+      wallet_address: toAddress.toLowerCase(),
+      ref_code: receiverRefCode,
+      direction: "in",
+      purpose: "user",
+      amount: amountNumber,
+      tx_hash: result.transactionHash,
+      status: "completed",
+    });
+
+    if (inResult.error) {
+      console.warn("❌ 유저간 입금 기록 실패:", inResult.error.message);
+    } else {
+      console.log("✅ 유저간 입금 기록 성공");
+    }
+  }
+} catch (err) {
+  console.error("❌ 수신자 입금 기록 중 오류:", err);
+}
+
 
       setTimeout(() => {
         fetchBalance();
