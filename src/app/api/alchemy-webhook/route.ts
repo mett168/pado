@@ -26,6 +26,18 @@ export async function POST(req: NextRequest) {
 
     const usdtAmount = parseFloat(value);
 
+    // ✅ 중복 트랜잭션 해시 체크
+    const { data: existing } = await supabase
+      .from("usdt_history")
+      .select("id")
+      .eq("tx_hash", hash)
+      .maybeSingle();
+
+    if (existing) {
+      console.log("⚠️ 중복 트랜잭션 해시. 기록 생략:", hash);
+      continue;
+    }
+
     const { data: user } = await supabase
       .from("users")
       .select("ref_code")
