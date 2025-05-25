@@ -105,7 +105,7 @@ export default function WithdrawPage() {
         wallet_address: walletAddress,
         ref_code: refCode,
         direction: "out",
-        purpose: "user", // ✅ 유저간 송금
+        purpose: "user",
         amount: amountNumber,
         tx_hash: result.transactionHash,
         status: "completed",
@@ -116,6 +116,35 @@ export default function WithdrawPage() {
         setStatus(`⚠️ 기록 실패: ${insertResult.error.message}`);
       } else {
         console.log("[✅ Supabase 기록 성공]");
+      }
+
+      // ✅ Supabase 기록 (user 입금)
+      try {
+        const { data: receiver } = await supabase
+          .from("users")
+          .select("ref_code")
+          .eq("wallet_address", toAddress.toLowerCase())
+          .maybeSingle();
+
+        const receiverRefCode = receiver?.ref_code || "unknown";
+
+        const inResult = await supabase.from("usdt_history").insert({
+          wallet_address: toAddress.toLowerCase(),
+          ref_code: receiverRefCode,
+          direction: "in",
+          purpose: "user",
+          amount: amountNumber,
+          tx_hash: result.transactionHash,
+          status: "completed",
+        });
+
+        if (inResult.error) {
+          console.warn("❌ 유저간 입금 기록 실패:", inResult.error.message);
+        } else {
+          console.log("✅ 유저간 입금 기록 성공");
+        }
+      } catch (err) {
+        console.error("❌ 수신자 입금 기록 중 오류:", err);
       }
 
       setTimeout(() => {
@@ -131,7 +160,6 @@ export default function WithdrawPage() {
 
   return (
     <main className="min-h-screen bg-[#f5f7fa] pb-10">
-      {/* 상단바 */}
       <div className="flex items-center px-4 py-3 bg-white border-b">
         <button onClick={() => router.back()}>
           <ChevronLeft className="w-6 h-6 text-gray-700" />

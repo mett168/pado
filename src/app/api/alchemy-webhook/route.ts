@@ -24,7 +24,7 @@ export async function POST(req: NextRequest) {
     )
       continue;
 
-    const usdtAmount = Number(value) / 1e6;
+    const usdtAmount = parseFloat(value);
 
     const { data: user } = await supabase
       .from("users")
