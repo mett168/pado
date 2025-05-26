@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
+import { getKSTISOString, getKSTDateString } from "@/lib/dateUtil"; // ✅ 한국시간 함수 추가
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -88,7 +89,11 @@ export async function POST(req: NextRequest) {
 
   // 신규 추천코드/닉네임 생성
   const newRefCode = await generateNextReferralCode();
-  const finalName = name.trim; // ✅ name이 없으면 nickname(ref_code) 사용
+  const finalName = name?.trim() || newRefCode; // ✅ name 없으면 ref_code 사용
+
+  // ✅ 가입 날짜/시간 설정 (KST 기준)
+  const joinedAt = getKSTISOString();     // 예: 2025-05-26T09:12:33.000Z
+  const joinedDate = getKSTDateString();  // 예: 2025-05-26
 
   // 🆕 신규 유저 등록
   const { data: inserted, error: insertError } = await supabase
@@ -98,11 +103,13 @@ export async function POST(req: NextRequest) {
       email,
       phone,
       nickname: newRefCode,
-      name: finalName, // ✅ 자동 보완
+      name: finalName,
       ref_code: newRefCode,
       ref_by,
       center_id,
       role: "user",
+      joined_at: joinedAt,         // ✅ 한국시간 시간
+      joined_date: joinedDate,     // ✅ 한국시간 날짜
     })
     .select("id, ref_code, nickname")
     .single();

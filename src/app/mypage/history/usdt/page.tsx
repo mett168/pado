@@ -77,7 +77,7 @@ export default function UsdtHistoryPage() {
             >
               <div className="flex justify-between">
                 <span className="font-semibold">
-                  {item.direction === "in" ? "입금" : "출금"} {" "}
+                  {item.direction === "in" ? "입금" : "출금"}{" "}
                   ({item.purpose === "external"
                     ? "외부"
                     : item.purpose === "reward"
@@ -87,7 +87,9 @@ export default function UsdtHistoryPage() {
                     : "기타"})
                 </span>
                 <span className="text-sm text-gray-500">
-                  {new Date(item.created_at).toLocaleString()}
+                  {new Date(item.created_at).toLocaleString("ko-KR", {
+                    timeZone: "Asia/Seoul",
+                  })}
                 </span>
               </div>
               <div className="mt-1">💰 금액: {item.amount} USDT</div>

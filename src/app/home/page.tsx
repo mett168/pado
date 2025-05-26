@@ -88,7 +88,7 @@ export default function HomePage() {
 
     const { data, error } = await supabase
       .from("reward_transfers")
-      .select("reward_amount, referral_amount, center_amount, created_at")
+      .select("reward_amount, referral_amount, center_amount")
       .eq("ref_code", user.ref_code)
       .eq("reward_date", today); // 👈 이 방식으로 날짜 정확하게 비교
 
@@ -114,7 +114,7 @@ export default function HomePage() {
 
     const { data: user } = await supabase
       .from("users")
-      .select("ref_code, ref_by, center_id")
+      .select("ref_code, ref_by, center_id, name")
       .eq("wallet_address", lowerAddress)
       .maybeSingle();
     if (!user || !user.ref_code) return;
@@ -129,6 +129,7 @@ export default function HomePage() {
     const { error } = await supabase.from("nfts").upsert({
       ref_code: user.ref_code,
       wallet_address: lowerAddress,
+      name: user.name || "", // ✅ name 추가
       ref_by: user.ref_by || "SW10101",
       center_id: user.center_id || "SW10101",
       nft300: balances.nft300,

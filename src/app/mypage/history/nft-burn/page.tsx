@@ -59,7 +59,9 @@ export default function NftBurnHistoryPage() {
                   <span className="font-semibold">- {item.quantity} 개</span>
                 </div>
                 <div className="text-gray-400 text-xs">
-                  {new Date(item.created_at).toLocaleString()}
+                  {new Date(item.created_at).toLocaleString("ko-KR", {
+                    timeZone: "Asia/Seoul",
+                  })}
                 </div>
                 <div className="text-blue-600 text-xs truncate mt-1">
                   <a

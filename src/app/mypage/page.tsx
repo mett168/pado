@@ -2,14 +2,14 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { useActiveAccount, useActiveWallet } from "thirdweb/react"; // ✅ 수정
+import { useActiveAccount, useActiveWallet } from "thirdweb/react";
 import BottomNav from "@/components/BottomNav";
 import TopBar from "@/components/TopBar";
 import { supabase } from "@/lib/supabaseClient";
 
 export default function MyPage() {
   const account = useActiveAccount();
-  const wallet = useActiveWallet(); // ✅ 추가
+  const wallet = useActiveWallet();
   const router = useRouter();
 
   const [userData, setUserData] = useState<any>(null);
@@ -56,22 +56,17 @@ export default function MyPage() {
     );
   }
 
-const handleLogout = async () => {
-  try {
-    // 저장된 지갑 정보 및 세션 삭제
-    localStorage.clear();
-    sessionStorage.clear();
-
-    // (선택) logout 상태 플래그 기록
-    localStorage.setItem("logged_out", "true");
-
-    // 홈 또는 로그인 페이지로 리디렉션
-    window.location.replace("/");
-  } catch (error) {
-    console.error("❌ 로그아웃 실패:", error);
-    alert("로그아웃 중 문제가 발생했습니다.");
-  }
-};
+  const handleLogout = async () => {
+    try {
+      localStorage.clear();
+      sessionStorage.clear();
+      localStorage.setItem("logged_out", "true");
+      window.location.replace("/");
+    } catch (error) {
+      console.error("❌ 로그아웃 실패:", error);
+      alert("로그아웃 중 문제가 발생했습니다.");
+    }
+  };
 
   return (
     <>
@@ -181,7 +176,7 @@ const handleLogout = async () => {
                 <span>가입 일시</span>
                 <span className="text-gray-800">
                   {userData?.created_at
-                    ? new Date(userData.created_at).toLocaleString()
+                    ? new Date(new Date(userData.created_at).getTime() + 9 * 60 * 60 * 1000).toLocaleString("ko-KR")
                     : "-"}
                 </span>
               </div>
@@ -216,23 +211,23 @@ const handleLogout = async () => {
             </div>
           </section>
 
-<section className="space-y-4 mb-2">
-  <a
-    href="http://pf.kakao.com/_rxaxmGn/chat"
-    target="_blank"
-    rel="noopener noreferrer"
-    className="block bg-white p-4 rounded-xl shadow flex justify-between items-center hover:bg-gray-50"
-  >
-    <div className="flex items-center space-x-2">
-      <img src="/icon-question.png" alt="문의" className="w-5 h-5" />
-      <span className="text-sm">1:1 문의하기</span>
-    </div>
-    <img src="/icon-link.png" alt="이동" className="w-4 h-4" />
-  </a>
-</section>
+          {/* 문의 */}
+          <section className="space-y-4 mb-2">
+            <a
+              href="http://pf.kakao.com/_rxaxmGn/chat"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="block bg-white p-4 rounded-xl shadow flex justify-between items-center hover:bg-gray-50"
+            >
+              <div className="flex items-center space-x-2">
+                <img src="/icon-question.png" alt="문의" className="w-5 h-5" />
+                <span className="text-sm">1:1 문의하기</span>
+              </div>
+              <img src="/icon-link.png" alt="이동" className="w-4 h-4" />
+            </a>
+          </section>
 
-
-          {/* 로그아웃 버튼 */}
+          {/* 로그아웃 */}
           <button
             onClick={handleLogout}
             className="w-full bg-blue-600 text-white py-2 rounded-lg font-semibold mb-4"

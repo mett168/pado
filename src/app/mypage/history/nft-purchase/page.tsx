@@ -1,13 +1,13 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation"; // ✅ 추가
+import { useRouter } from "next/navigation";
 import { useActiveAccount } from "thirdweb/react";
 import TopBar from "@/components/TopBar";
 import { supabase } from "@/lib/supabaseClient";
 
 export default function NftInHistoryPage() {
-  const router = useRouter(); // ✅ 추가
+  const router = useRouter();
   const account = useActiveAccount();
   const [records, setRecords] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -60,7 +60,9 @@ export default function NftInHistoryPage() {
                   <span className="font-semibold">+ {item.quantity} 개</span>
                 </div>
                 <div className="text-gray-400 text-xs">
-                  {new Date(item.created_at).toLocaleString()}
+                  {new Date(item.created_at).toLocaleString("ko-KR", {
+                    timeZone: "Asia/Seoul",
+                  })}
                 </div>
                 <div className="text-blue-600 text-xs truncate mt-1">
                   <a

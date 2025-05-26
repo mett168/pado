@@ -89,79 +89,74 @@ export default function InvitePage() {
       <main className="min-h-screen bg-[#f5f7fa] pb-32 w-full">
         <div className="px-2 pt-4 max-w-md mx-auto space-y-4">
           {/* ✅ 나의 초대 코드 */}
-<section className="bg-white rounded-xl shadow overflow-hidden">
-  <div className="bg-blue-600 text-white px-3 py-1 font-semibold text-base">
-    나의 초대 코드
-  </div>
-  <div className="px-3 py-4 space-y-1 text-xs text-black">
-    <div className="text-left">
-      <span className="font-semibold">초대코드 :</span> {refCode || "불러오는 중..."}
-    </div>
-    {inviteLink && (
-      <>
-        <div className="text-left break-all  mt-6">
-          <span className="font-semibold">초대링크 :</span> {inviteLink}
-        </div>
-        <button
-          onClick={handleCopy}
-          className="w-full bg-blue-100 hover:bg-blue-200 text-blue-600 py-2 rounded-lg text-sm font-semibold  mt-4"
-        >
-          {copied ? "✅ 복사됨" : "초대 링크 복사하기"}
-        </button>
-      </>
-    )}
-  </div>
-</section>
+          <section className="bg-white rounded-xl shadow overflow-hidden">
+            <div className="bg-blue-600 text-white px-3 py-1 font-semibold text-base">
+              나의 초대 코드
+            </div>
+            <div className="px-3 py-4 space-y-1 text-xs text-black">
+              <div className="text-left">
+                <span className="font-semibold">초대코드 :</span> {refCode || "불러오는 중..."}
+              </div>
+              {inviteLink && (
+                <>
+                  <div className="text-left break-all  mt-6">
+                    <span className="font-semibold">초대링크 :</span> {inviteLink}
+                  </div>
+                  <button
+                    onClick={handleCopy}
+                    className="w-full bg-blue-100 hover:bg-blue-200 text-blue-600 py-2 rounded-lg text-sm font-semibold  mt-4"
+                  >
+                    {copied ? "✅ 복사됨" : "초대 링크 복사하기"}
+                  </button>
+                </>
+              )}
+            </div>
+          </section>
 
-
-
-{/* ✅ 초대한 친구 목록 */}
-<section className="bg-white rounded-xl shadow overflow-hidden">
-  <div className="bg-blue-600 text-white px-3 py-1 font-semibold text-base">
-    나의 초대 친구
-  </div>
-  <div className="px-3 py-4">
-    {invitees.length > 0 ? (
-      <div className="overflow-x-auto">
-        <table className="w-full text-xs text-center">
-          <thead>
-            <tr className="bg-transparent text-gray-700 font-semibold">
-              <th className="p-2">초대친구</th>
-              <th className="p-2">가입날짜</th>
-            </tr>
-          </thead>
-          <tbody>
-            {invitees.map((user, idx) => (
-              <tr key={idx} className="border-t">
-                <td className="p-2 text-left">
-  <div className="flex items-center gap-1">
-    <span>{user.name}</span>
-    <Link href={`/invite-detail?code=${user.ref_code}`}>
-      <button className="bg-gray-200 text-[10px] px-2 py-0.5 rounded">
-        상세보기
-      </button>
-    </Link>
-  </div>
-</td>
-                <td className="p-2">
-                  {new Date(user.created_at).toLocaleDateString("ko-KR", {
-                    year: "numeric",
-                    month: "numeric",
-                    day: "numeric",
-                  })}
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-    ) : (
-      <p className="text-center text-xs text-gray-400 py-4">초대한 친구가 없습니다.</p>
-    )}
-  </div>
-</section>
-
-
+          {/* ✅ 초대한 친구 목록 */}
+          <section className="bg-white rounded-xl shadow overflow-hidden">
+            <div className="bg-blue-600 text-white px-3 py-1 font-semibold text-base">
+              나의 초대 친구
+            </div>
+            <div className="px-3 py-4">
+              {invitees.length > 0 ? (
+                <div className="overflow-x-auto">
+                  <table className="w-full text-xs text-center">
+                    <thead>
+                      <tr className="bg-transparent text-gray-700 font-semibold">
+                        <th className="p-2">초대친구</th>
+                        <th className="p-2">가입날짜</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {invitees.map((user, idx) => (
+                        <tr key={idx} className="border-t">
+                          <td className="p-2 text-left">
+                            <div className="flex items-center gap-1">
+                              <span>{user.name}</span>
+                              <Link href={`/invite-detail?code=${user.ref_code}`}>
+                                <button className="bg-gray-200 text-[10px] px-2 py-0.5 rounded">
+                                  상세보기
+                                </button>
+                              </Link>
+                            </div>
+                          </td>
+                          <td className="p-2">
+                            {(() => {
+                              const kst = new Date(new Date(user.created_at).getTime() + 9 * 60 * 60 * 1000);
+                              return `${kst.getFullYear()}. ${kst.getMonth() + 1}. ${kst.getDate()}.`;
+                            })()}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              ) : (
+                <p className="text-center text-xs text-gray-400 py-4">초대한 친구가 없습니다.</p>
+              )}
+            </div>
+          </section>
         </div>
         <BottomNav />
       </main>
