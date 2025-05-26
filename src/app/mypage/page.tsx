@@ -23,7 +23,7 @@ export default function MyPage() {
 
       const { data: user, error } = await supabase
         .from("users")
-        .select("name, phone, email, created_at, ref_by")
+        .select("name, phone, email, created_at, ref_by, joined_at") // ✅ joined_at 추가
         .eq("wallet_address", account.address.toLowerCase())
         .maybeSingle();
 
@@ -176,7 +176,7 @@ export default function MyPage() {
   <span>가입 일시</span>
   <span className="text-gray-800">
     {userData?.joined_at
-      ? new Date(userData.joined_at).toLocaleString("ko-KR")
+      ? userData.joined_at.slice(0, 19).replace("T", " ")
       : "-"}
   </span>
 </div>
