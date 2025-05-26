@@ -171,15 +171,16 @@ export default function MyPage() {
                 <span className="text-gray-800">{userData?.email || "-"}</span>
               </div>
 
-              {/* 가입 일시 */}
-              <div className="flex justify-between px-4 py-3">
-                <span>가입 일시</span>
-                <span className="text-gray-800">
-                  {userData?.created_at
-                    ? new Date(new Date(userData.created_at).getTime() + 9 * 60 * 60 * 1000).toLocaleString("ko-KR")
-                    : "-"}
-                </span>
-              </div>
+{/* 가입 일시 */}
+<div className="flex justify-between px-4 py-3">
+  <span>가입 일시</span>
+  <span className="text-gray-800">
+    {userData?.joined_at
+      ? new Date(userData.joined_at).toLocaleString("ko-KR")
+      : "-"}
+  </span>
+</div>
+
 
               {/* 추천인 */}
               <div className="flex justify-between px-4 py-3">
