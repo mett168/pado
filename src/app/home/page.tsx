@@ -90,8 +90,7 @@ export default function HomePage() {
       .from("reward_transfers")
       .select("reward_amount, referral_amount, center_amount, created_at")
       .eq("ref_code", user.ref_code)
-      .gte("created_at", `${today}T00:00:00`)
-      .lt("created_at", `${today}T23:59:59`);
+      .eq("reward_date", today); // 👈 이 방식으로 날짜 정확하게 비교
 
     if (error || !data || data.length === 0) {
       setInvestReward(0);
