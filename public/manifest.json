@@ -1,6 +1,6 @@
 {
   "name": "SNOWWALLET",
-  "short_name": "SNOW",
+  "short_name": "SnowWallet",
   "start_url": "/",
   "display": "browser",      
   "background_color": "#ffffff",
