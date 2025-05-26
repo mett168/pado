@@ -89,7 +89,7 @@ export async function POST(req: NextRequest) {
 
   // 신규 추천코드/닉네임 생성
   const newRefCode = await generateNextReferralCode();
-  const finalName = name?.trim() || newRefCode; // ✅ name 없으면 ref_code 사용
+  const finalName = name?.trim() || null; // ❗null로 저장하면 이후 name 체크 가능
 
   // ✅ 가입 날짜/시간 설정 (KST 기준)
   const joinedAt = getKSTISOString();     // 예: 2025-05-26T09:12:33.000Z
