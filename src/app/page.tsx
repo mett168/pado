@@ -80,13 +80,13 @@ useEffect(() => {
           <section className="w-full mb-6">
             <div className="p-4">
               <p className="text-[16px] font-bold text-left text-[#4d4e4f]">눈덩이처럼 불어나는 나의 자산</p>
-              <h1 className="text-[16px] font-bold text-left text-[#4d4e4f]">SNOWWALLET</h1>
+              <h1 className="text-[16px] font-bold text-left text-[#4d4e4f]">PADOS LAB</h1>
             </div>
           </section>
 
           <div className="flex justify-center mt-20 mb-10">
             <div className="rounded-xl p-6">
-              <Image src="/logo.png" alt="Logo" width={100} height={100} priority />
+              <Image src="/logo.png" alt="Logo" width={150} height={150} priority />
             </div>
           </div>
 

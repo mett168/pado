@@ -91,7 +91,7 @@ export function NftBurnBox({
     <div className="bg-white rounded-2xl shadow-md p-4 mt-2">
       <input
         type="number"
-        placeholder="해지 수량을 입력하세요."
+        placeholder="해지 금액을 입력하세요."
         className="w-full border rounded-md p-2 text-sm mb-2"
         value={burnAmount}
         onChange={(e) => setBurnAmount(e.target.value)}
@@ -104,7 +104,7 @@ export function NftBurnBox({
         {txPending ? "해지 중..." : "NFT 해지하기"}
       </button>
       <p className="text-xs text-gray-400 mt-1">
-        구매한 NFT를 <strong>지정된 주소로 전송하여 환불</strong> 처리합니다. 전송 후에는 리워드가 중단되며, 24시간 이내 USDT로 환불됩니다.
+        구매한 NFT를 <strong>지정된 주소로 전송하여 환불</strong> 처리합니다. 전송 후에는 리워드가 중단되며, 3영업일 이내  환불됩니다.
       </p>
     </div>
   );

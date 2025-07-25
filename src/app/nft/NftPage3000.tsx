@@ -7,7 +7,6 @@ import { readContract } from "thirdweb";
 import { polygon } from "thirdweb/chains";
 import { client } from "@/lib/client";
 import BottomNav from "@/components/BottomNav";
-import NftTransferBox from "@/components/NftTransferBox";
 import { NftBurnBox } from "@/components/NftBurnBox";
 
 const CONTRACT_ADDRESS = "0xc925cd3fbbc506b69204fe97329c6b2b33d17f99"; // SNOWBOT3000 주소
@@ -60,15 +59,7 @@ export default function NftPage3000() {
     />
     <div className="flex-1 text-sm font-semibold text-gray-800 space-y-1">
       {/* 이름 */}
-      <p>SNOWBOT 3000</p>
-
-      {/* 보유 수량 */}
-      <p>
-        보유 수량:{" "}
-        <span className="text-blue-600">
-          {loading ? "조회 중..." : `${nftCount ?? 0}개`}
-        </span>
-      </p>
+      <p>PADOPASS 100,000,000</p>
 
       {error && (
         <p className="text-xs text-red-500 mt-1">{error}</p>
@@ -77,11 +68,7 @@ export default function NftPage3000() {
   </div>
 </div>
 
-        {/* 양도 신청 */}
-        <div>
-          <p className="text-md font-semibold text-gray-800 mb-1 pl-2">양도 신청</p>
-          <NftTransferBox account={account} onTransferComplete={fetchNFTBalance} nftType="nft3000" />
-        </div>
+
 
         {/* 해지 신청 */}
         <div>
