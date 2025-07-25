@@ -72,7 +72,7 @@ useEffect(() => {
   return (
     <>
       <Head>
-        <title>SMW01 스마트 월렛</title>
+        <title>PADOS LAB</title>
       </Head>
 
       <main className="min-h-screen flex flex-col justify-between bg-[#f8fafc] px-4 py-6 max-w-md mx-auto text-center">
